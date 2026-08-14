@@ -59,6 +59,9 @@ import {
 } from './api/session-search.ts'
 // Type-only: resolves `ctx.get('sessionProjections')` to the projection registry.
 import type {} from '@deepseek-ai/dsh-session-projection'
+// Side-effect type import: merges `ctx.imagePromptPreprocessor` (optional
+// plugin service) into this program's Context.
+import type { ImagePromptPreprocessor } from './image-preprocessor.ts'
 // Type-only: resolves `ctx.get('tasks')` to the background job registry.
 import type {} from '@deepseek-ai/dsh-jobs'
 import type { JobSnapshot } from '@deepseek-ai/dsh-jobs'
@@ -2480,21 +2483,38 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
           ...(canonicalTimeZone === undefined ? {} : { clientTimeZone: canonicalTimeZone }),
         }
         const hasImage = content.some(part => part.type === 'image')
+        // Images addressed to a text-only model go through the OPTIONAL
+        // image-prompt preprocessor plugin: the durable message keeps the
+        // original content (images render in the transcript), while the model
+        // receives the preprocessor's plain-text projection. Without a
+        // preprocessor the original reject-with-error behavior applies.
+        let modelContent: ContentBlock[] | undefined
         const admit = async (): Promise<RpcResponse<{ accepted: true }>> => {
           try {
-            if (hasImage) {
+            if (hasImage && modelContent === undefined) {
               const current = selectionFor(agent).current
               const modelInfo = await ctx.llm.resolveModelInfo(current.provider, current.model)
               if (modelInfo.inputModalities !== undefined && !modelInfo.inputModalities.includes('image')) {
-                return err(request, {
-                  code: 'attachment-error',
-                  message: `Model "${current.model}" does not support image input.`,
-                  details: { reason: 'MODEL_DOES_NOT_SUPPORT_IMAGES' },
-                })
+                const preprocessor: ImagePromptPreprocessor | undefined = ctx.get('imagePromptPreprocessor')
+                const prepared = preprocessor === undefined
+                  ? undefined
+                  : await preprocessor.prepare(sessionId, content).catch(() => undefined)
+                if (prepared === undefined) {
+                  return err(request, {
+                    code: 'attachment-error',
+                    message: `Model "${current.model}" does not support image input.`,
+                    details: { reason: 'MODEL_DOES_NOT_SUPPORT_IMAGES' },
+                  })
+                }
+                modelContent = await durablePromptContent(ctx, prepared.modelParts)
               }
             }
             const durable = await durablePromptContent(ctx, content)
-            const message: UserMessage = createUserMessage({ content: durable, source })
+            const message: UserMessage = createUserMessage({
+              content: durable,
+              ...(modelContent === undefined ? {} : { modelContent }),
+              source,
+            })
             if (mode === 'steer') agent.steer(message)
             else agent.followup(message)
           } catch (error: unknown) {
@@ -2906,6 +2926,9 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
         const { sessionId } = request.payload
         try {
           await ctx.workspaceRegistry.archiveSession(sessionId)
+          // Drop the session's staged image cache (best-effort; the
+          // preprocessor plugin owns the directory and never throws).
+          try { ctx.get('imagePromptPreprocessor')?.cleanup(sessionId) } catch { /* no preprocessor mounted */ }
         } catch (error: unknown) {
           // Only the registry's unknown-session rejection is the business
           // code; storage/durability failures propagate as internal errors.

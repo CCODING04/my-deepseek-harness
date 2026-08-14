@@ -21,8 +21,12 @@ import {
   DEFAULT_SESSION_LOG_COMPRESSION_LEVEL,
   type SessionLogCompressionLevel,
 } from './session-export.ts'
+// Side-effect type import: registers the optional `imagePromptPreprocessor`
+// service merge plus its public types.
+import type {} from './image-preprocessor.ts'
 
 export type * from './api/index.ts'
+export type { ImagePromptPreprocessor, PreparedImagePrompt } from './image-preprocessor.ts'
 export { RpcId } from './api/rpc.ts'
 export { toFetchHandler } from './fetch/handler.ts'
 export { AbstractApiClient, InProcessApiClient } from './fetch/client.ts'

@@ -140,6 +140,14 @@ export interface Message {
 /** A user-role specialization of the one shared message representation. */
 export interface UserMessage extends Message {
   readonly role: 'user'
+  /**
+   * Exact model-facing blocks when they differ from {@link Message.content}.
+   * `content` stays the display/durable surface (e.g. rendered images), while
+   * model adapters consume this field when present — the image-input pipeline
+   * stores the original image blocks in `content` and a plain-text
+   * instruction projection here.
+   */
+  readonly modelContent?: ContentBlock[]
 }
 
 /** A model-produced assistant specialization of the shared message representation. */

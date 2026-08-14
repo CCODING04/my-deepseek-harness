@@ -146,6 +146,24 @@ describe('serializeMessages', () => {
     })])).toThrow(expect.objectContaining({ code: 'UNSUPPORTED_CONTENT' }))
   })
 
+  it('uses modelContent (text-only projection) over content with images', () => {
+    // Simulate the image-input preprocessor: content keeps images for the UI,
+    // but modelContent carries a text-only projection for the model.
+    const message = createUserMessage({
+      content: [{
+        type: 'image',
+        attachment: {
+          attachmentId: AttachmentId(`sha256:${'a'.repeat(64)}`),
+          mediaType: 'image/png', bytes: 68, width: 1, height: 1,
+        },
+      }],
+      modelContent: [{ type: 'text', text: 'please analyze the staged image' }],
+      source: { kind: 'plugin', plugin: 'test' },
+    })
+    const wire = serializeMessages([message])
+    expect(wire).toEqual([{ role: 'user', content: 'please analyze the staged image' }])
+  })
+
   it('emits an empty user message rather than dropping block-less messages', () => {
     const wire = serializeMessages([createUserMessage({
       content: [],

@@ -299,7 +299,10 @@ export class PiAiAdapter extends LlmAdapter {
     using watchdog = idleWatchdog(upstream, streamIdleTimeoutMs, 'LLM_STREAM_IDLE_TIMEOUT')
 
     try {
-      const containsImage = options.messages.some(message => contentHasImage(message.content))
+      // Image support is judged against the model-facing projection: a
+      // message may display images while its modelContent is plain text.
+      const containsImage = options.messages.some(message =>
+        contentHasImage((message as { modelContent?: typeof message.content }).modelContent ?? message.content))
       if (containsImage && !model.input.includes('image')) {
         throw new LlmError(`pi-ai model "${model.id}" does not support image input`, 'UNSUPPORTED_CONTENT')
       }

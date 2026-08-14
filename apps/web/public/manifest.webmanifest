@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "DeepSeek Harness",
-  "short_name": "DSH",
+  "name": "Poké Harness",
+  "short_name": "POKÉ",
   "start_url": "/",
   "scope": "/",
   "display": "fullscreen",

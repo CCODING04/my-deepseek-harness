@@ -8,10 +8,13 @@
  * loading page, lists the per-entry fiber states and the sweep report (fail
  * loud, no partial UI).
  */
-import { useSyncExternalStore } from 'react'
+import { useSyncExternalStore, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { KernelSignal, LoaderStatus } from './loader-status.ts'
 import css from './AppRoot.module.css'
+
+/** Pokémon theme: a random buddy greets each boot (official artwork set). */
+const LOADING_PETS = ['pikachu', 'eevee', 'charizard', 'squirtle'] as const
 
 /** AppRoot props: settled signal, fiber-state projection feed, boot failure report, deferred real-UI factory. */
 export interface AppRootProps {
@@ -30,6 +33,8 @@ export function AppRoot(props: AppRootProps) {
   const settled = useSyncExternalStore(props.settled.subscribe, props.settled.getSnapshot)
   const status = useSyncExternalStore(props.status.subscribe, props.status.getSnapshot)
   const error = useSyncExternalStore(props.error.subscribe, props.error.getSnapshot)
+  // Random mascot per mount — a different buddy may greet each reload.
+  const [mascot] = useState(() => LOADING_PETS[Math.floor(Math.random() * LOADING_PETS.length)])
   const failed = Object.entries(status).filter(([, s]) => s === 'failed')
 
   if (settled) return <>{props.renderApp()}</>
@@ -39,7 +44,15 @@ export function AppRoot(props: AppRootProps) {
   return (
     <div className={css.boot}>
       <div className={css.card}>
-        <div className={css.wordmark}>HARNESS</div>
+        <img
+          className={css.mascot}
+          src={`/pokemon/${mascot}.png`}
+          alt=""
+          width={72}
+          height={72}
+          draggable={false}
+        />
+        <div className={css.wordmark}>POKÉ HARNESS</div>
         {!loud
           ? (
             <>

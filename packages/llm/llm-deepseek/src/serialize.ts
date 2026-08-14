@@ -52,8 +52,13 @@ function resolveThinking(options: GenerateOptions, defaults: RequestDefaults): R
   return defaults.thinking === undefined ? {} : { thinking: defaults.thinking }
 }
 
+/** Model-facing content: the explicit `modelContent` projection (image-input pipeline) or the raw content. */
+function modelContentOf(message: Message): readonly ContentBlock[] {
+  return (message as { modelContent?: ContentBlock[] }).modelContent ?? message.content
+}
+
 /** Join the text blocks of a message (used for user/tool-result content). */
-function flattenText(blocks: ContentBlock[]): string {
+function flattenText(blocks: readonly ContentBlock[]): string {
   return blocks
     .filter(block => block.type === 'text')
     .map(block => block.text)
@@ -112,9 +117,10 @@ function serializeAssistant(message: Message): WireMessage {
 export function serializeMessages(messages: Message[]): WireMessage[] {
   const wire: WireMessage[] = []
   for (const message of messages) {
-    assertTextOnly(message.content)
+    const modelBlocks = modelContentOf(message)
+    assertTextOnly(modelBlocks)
     if (message.role === 'system') {
-      wire.push({ role: 'system', content: flattenText(message.content) })
+      wire.push({ role: 'system', content: flattenText(modelBlocks) })
       continue
     }
     if (message.role === 'assistant') {
@@ -123,8 +129,8 @@ export function serializeMessages(messages: Message[]): WireMessage[] {
     }
     // user role: tool results ride in user messages in the harness
     // vocabulary, but DeepSeek wants them as role:'tool' messages.
-    const toolResults = message.content.filter(block => block.type === 'tool-result')
-    const text = flattenText(message.content)
+    const toolResults = modelBlocks.filter(block => block.type === 'tool-result')
+    const text = flattenText(modelBlocks)
     if (text.length > 0 || toolResults.length === 0) {
       wire.push({ role: 'user', content: text })
     }

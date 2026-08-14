@@ -10,20 +10,28 @@ import type { AttachmentStore } from '@deepseek-ai/dsh-attachment'
 import type { Context as PiContext, ImageContent, Message as PiMessage, TextContent, Tool as PiTool } from '@earendil-works/pi-ai'
 import { toPiAssistant } from './replay.ts'
 
-/** Join the text blocks of a harness message. */
+/** Join the text blocks of a harness message as the model sees them. */
 function flattenText(message: Message): string {
-  return message.content
+  return modelContentOf(message)
     .filter(block => block.type === 'text')
     .map(block => block.text)
     .join('')
 }
-
 
 /** Flatten text recursively inside one tool result. */
 function toolResultText(blocks: readonly ContentBlock[]): string {
   return blocks.map(block => block.type === 'text'
     ? block.text
     : block.type === 'tool-result' ? toolResultText(block.content) : '').join('')
+}
+
+/**
+ * The blocks a model request consumes for one message: the explicit
+ * `modelContent` projection when the producer provided one (image-input
+ * pipeline), else the shared content.
+ */
+function modelContentOf(message: Message): readonly ContentBlock[] {
+  return (message as { modelContent?: ContentBlock[] }).modelContent ?? message.content
 }
 
 async function userContent(
@@ -88,7 +96,7 @@ function textOnlyContext(options: GenerateOptions): PiContext {
   const toolNames = new Map<CallId, string>()
   const messages: PiMessage[] = []
   for (const message of options.messages) {
-    if (contentHasImage(message.content)) {
+    if (contentHasImage(modelContentOf(message))) {
       throw new LlmError('pi-ai image conversion requires the durable attachment service', 'UNSUPPORTED_CONTENT')
     }
     if (message.role === 'system') {
@@ -102,7 +110,7 @@ function textOnlyContext(options: GenerateOptions): PiContext {
       continue
     }
     const text = flattenText(message)
-    const results = message.content.filter(block => block.type === 'tool-result')
+    const results = modelContentOf(message).filter(block => block.type === 'tool-result')
     if (text.length > 0 || results.length === 0) messages.push({ role: 'user', content: text, timestamp: 0 })
     for (const result of results) {
       messages.push({
@@ -164,9 +172,9 @@ async function toPiContextWithImages(options: GenerateOptions, attachments: Atta
       continue
     }
     // user role: text + tool results (each result becomes its own message).
-    const regular = message.content.filter(block => block.type !== 'tool-result')
+    const regular = modelContentOf(message).filter(block => block.type !== 'tool-result')
     const content = await userContent(regular, attachments)
-    const results = message.content.filter(block => block.type === 'tool-result')
+    const results = modelContentOf(message).filter(block => block.type === 'tool-result')
     if (content.length > 0 || results.length === 0) {
       messages.push({ role: 'user', content, timestamp: 0 })
     }
