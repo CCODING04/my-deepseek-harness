@@ -234,9 +234,17 @@ function imageInEvent(event: SessionEvent, match: (ref: ImageAttachmentRef) => b
   return undefined
 }
 
+/**
+ * The blocks the model consumes for one message: the explicit `modelContent`
+ * projection when present (image-input pipeline), else the shared content.
+ */
+function modelBlocksOf(message: { content: readonly ContentBlock[]; modelContent?: ContentBlock[] }): readonly ContentBlock[] {
+  return message.modelContent ?? message.content
+}
+
 /** True when the current model-visible surface contains an image. */
-function messagesHaveImage(messages: readonly { content: readonly ContentBlock[] }[]): boolean {
-  return messages.some(message => contentHasImage(message.content))
+function messagesHaveImage(messages: readonly { content: readonly ContentBlock[]; modelContent?: ContentBlock[] }[]): boolean {
+  return messages.some(message => contentHasImage(modelBlocksOf(message)))
 }
 
 /** Resolve the first reference matching one opaque id. */
@@ -2296,7 +2304,7 @@ export function createApiProxy(ctx: Context, defaults: ApiProxyDefaults): ApiPro
                 : { reasoningEffort: ReasoningEffortId(reasoningEffort) },
             })
             const pendingImage = [...found.agent.inbox.nextTurn, ...found.agent.inbox.nextStep]
-              .some(message => contentHasImage(message.content))
+              .some(message => contentHasImage(modelBlocksOf(message)))
             if (pendingImage || messagesHaveImage(found.agent.session.deriveMessages())) {
               const info = await ctx.llm.resolveModelInfo(resolved.provider, resolved.model)
               if (info.inputModalities !== undefined && !info.inputModalities.includes('image')) {
