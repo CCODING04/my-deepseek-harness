@@ -25,6 +25,16 @@ body {
 body[data-ds-dark-theme] {
   background-image:
     url('/pokemon/bg-dark.png'),
+    /* Night starfield: fine white pinpoints layered over the dark plate; the
+       screen blend makes them read as glowing, not painted. */
+    radial-gradient(1.2px 1.2px at 18% 24%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 31% 68%, rgba(255, 255, 255, 0.55) 0%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 47% 34%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 58% 78%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 72% 22%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 84% 56%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1.3px 1.3px at 92% 84%, rgba(255, 255, 255, 0.45) 0%, transparent 100%),
+    radial-gradient(1px 1px at 9% 88%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
     radial-gradient(1400px 700px at 88% -8%,
       color-mix(in srgb, var(--dsw-static-blue-500) 10%, transparent) 0%,
       transparent 70%),
@@ -34,7 +44,9 @@ body[data-ds-dark-theme] {
     radial-gradient(760px 440px at 50% 118%,
       color-mix(in srgb, var(--dsw-static-yellow-400) 5%, transparent) 0%,
       transparent 75%);
-  background-blend-mode: screen, normal, normal, normal;
+  background-blend-mode:
+    screen, screen, screen, screen, screen, screen, screen, screen,
+    normal, normal, normal;
 }
 
 ::selection {
@@ -163,6 +175,55 @@ body[data-ds-dark-theme] {
   .decor-note,
   .decor-bubbles {
     display: none;
+  }
+}
+
+/* Night silhouettes (dark mode only): the transparent back sprites turned
+   into pure-black companions via brightness(0), tucked into the quiet corners
+   so they never sit under text. Hidden by default; the dark palette gates
+   them, and the ornaments off switch hides the whole layer. */
+.decor-night-sil {
+  display: none;
+}
+
+body[data-ds-dark-theme] .decor-night-sil {
+  display: block;
+  position: fixed;
+  image-rendering: pixelated;
+  filter: brightness(0);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.decor-night-pika {
+  left: 14%;
+  bottom: 22px;
+  width: 104px;
+  height: 104px;
+  animation: pokemon-ornament-float 6s ease-in-out infinite;
+}
+
+.decor-night-bulba {
+  right: 10%;
+  bottom: 16px;
+  width: 76px;
+  height: 76px;
+  opacity: 0.12;
+  animation: pokemon-ornament-float 7s ease-in-out 0.8s infinite;
+}
+
+.decor-night-gengar {
+  left: 6%;
+  top: 44%;
+  width: 84px;
+  height: 84px;
+  opacity: 0.13;
+  animation: pokemon-ornament-twinkle 8s ease-in-out infinite;
+}
+
+@media (max-width: 880px) {
+  .decor-night-sil {
+    display: none !important;
   }
 }
 

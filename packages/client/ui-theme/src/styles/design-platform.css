@@ -350,3 +350,135 @@ body[data-ds-dark-theme] {
   --dsw-specific-sidebar-nav-item-hover: rgb(25, 30, 52);
   --dsw-specific-tip: rgb(31, 37, 62);
 }
+
+/* Color palettes (settings → Appearance → 配色): alias-layer overrides on
+ * top of the base Pokéball-red sheets, selected by body[data-dsh-palette].
+ * Gengar violet — a haunted purple remap; Ocean blue — a deep-sea navy. */
+
+body[data-dsh-palette="gengar"] {
+  --dsw-alias-bg-base: rgb(249, 246, 252);
+  --dsw-alias-bg-layer-1: rgb(255, 255, 255);
+  --dsw-alias-bg-layer-2: rgb(253, 251, 255);
+  --dsw-alias-bg-layer-3: rgb(255, 255, 255);
+  --dsw-alias-bg-module-platform: rgb(244, 238, 250);
+  --dsw-alias-bg-multi-select: rgb(244, 238, 250);
+  --dsw-alias-bg-overlay: rgb(233, 225, 248);
+  --dsw-alias-brand-primary-new-colorprimary-new-color: rgb(124, 92, 191);
+  --dsw-alias-brand-primary: rgb(59, 42, 102);
+  --dsw-alias-brand-text: rgb(59, 42, 102);
+  --dsw-alias-button-info-fill: rgb(124, 92, 191);
+  --dsw-alias-button-info-hover: rgb(107, 75, 176);
+  --dsw-alias-button-primary-dimmed: rgb(240, 234, 250);
+  --dsw-alias-button-primary-fill: rgb(124, 92, 191);
+  --dsw-alias-button-primary-hover: rgb(107, 75, 176);
+  --dsw-alias-interactive-bg-active: rgba(124, 92, 191, 0.14);
+  --dsw-alias-interactive-bg-hover-accent: rgba(124, 92, 191, 0.18);
+  --dsw-alias-label-primary-bluish: rgb(59, 42, 102);
+  --dsw-alias-scrollbar-bg-l1: rgba(124, 92, 191, 0.4);
+  --dsw-alias-scrollbar-bg-l2: rgba(124, 92, 191, 0.5);
+  --dsw-alias-scrollbar-hover-l1: rgba(107, 75, 176, 0.6);
+  --dsw-alias-scrollbar-hover-l2: rgba(107, 75, 176, 0.7);
+  --dsw-alias-state-business-primary: rgb(124, 92, 191);
+  --dsw-alias-state-business-tertiary: rgb(233, 225, 248);
+  --dsw-specific-bubble-highlight: rgb(240, 232, 252);
+  --dsw-specific-bubble: rgb(246, 240, 253);
+  --dsw-specific-sidebar-fill: rgb(244, 238, 250);
+  --dsw-specific-sidebar-nav-item-active: rgb(233, 225, 248);
+  --dsw-specific-sidebar-nav-item-hover: rgb(244, 238, 250);
+}
+
+body[data-dsh-palette="gengar"][data-ds-dark-theme] {
+  --dsw-alias-bg-base: rgb(24, 18, 38);
+  --dsw-alias-bg-layer-1: rgb(32, 25, 50);
+  --dsw-alias-bg-layer-2: rgb(40, 31, 60);
+  --dsw-alias-bg-layer-3: rgb(48, 38, 70);
+  --dsw-alias-bg-mask-drop: rgba(24, 18, 38, 0.7);
+  --dsw-alias-bg-module-platform: rgb(48, 38, 70);
+  --dsw-alias-bg-multi-select: rgb(40, 31, 60);
+  --dsw-alias-bg-overlay: rgb(66, 52, 96);
+  --dsw-alias-brand-primary-new-colorprimary-new-color: rgb(167, 139, 250);
+  --dsw-alias-brand-primary: rgb(167, 139, 250);
+  --dsw-alias-brand-text: rgb(236, 228, 250);
+  --dsw-alias-button-info-fill: rgb(139, 92, 246);
+  --dsw-alias-button-info-hover: rgb(157, 111, 247);
+  --dsw-alias-button-primary-dimmed: rgb(45, 34, 68);
+  --dsw-alias-button-primary-fill: rgb(124, 92, 191);
+  --dsw-alias-button-primary-hover: rgb(139, 107, 206);
+  --dsw-alias-interactive-bg-hover-accent: rgba(167, 139, 250, 0.18);
+  --dsw-alias-label-primary-bluish: rgb(236, 228, 250);
+  --dsw-alias-scrollbar-bg-l1: rgba(167, 139, 250, 0.4);
+  --dsw-alias-scrollbar-bg-l2: rgba(167, 139, 250, 0.5);
+  --dsw-alias-scrollbar-hover-l1: rgba(190, 160, 255, 0.6);
+  --dsw-alias-scrollbar-hover-l2: rgba(190, 160, 255, 0.7);
+  --dsw-alias-state-business-primary: rgb(167, 139, 250);
+  --dsw-alias-state-business-tertiary: rgb(45, 34, 68);
+  --dsw-specific-bubble-highlight: rgb(58, 40, 80);
+  --dsw-specific-bubble: rgb(47, 33, 64);
+  --dsw-specific-sidebar-fill: rgb(28, 21, 44);
+  --dsw-specific-sidebar-nav-item-active: rgb(52, 40, 80);
+  --dsw-specific-sidebar-nav-item-hover: rgb(32, 25, 50);
+}
+
+body[data-dsh-palette="ocean"] {
+  --dsw-alias-bg-base: rgb(248, 251, 253);
+  --dsw-alias-bg-layer-1: rgb(255, 255, 255);
+  --dsw-alias-bg-layer-2: rgb(252, 254, 255);
+  --dsw-alias-bg-layer-3: rgb(255, 255, 255);
+  --dsw-alias-bg-module-platform: rgb(241, 247, 252);
+  --dsw-alias-bg-multi-select: rgb(241, 247, 252);
+  --dsw-alias-bg-overlay: rgb(224, 238, 250);
+  --dsw-alias-brand-primary-new-colorprimary-new-color: rgb(14, 165, 233);
+  --dsw-alias-brand-primary: rgb(11, 59, 102);
+  --dsw-alias-brand-text: rgb(11, 59, 102);
+  --dsw-alias-button-info-fill: rgb(14, 165, 233);
+  --dsw-alias-button-info-hover: rgb(12, 142, 212);
+  --dsw-alias-button-primary-dimmed: rgb(227, 240, 253);
+  --dsw-alias-button-primary-fill: rgb(29, 78, 216);
+  --dsw-alias-button-primary-hover: rgb(27, 68, 190);
+  --dsw-alias-interactive-bg-active: rgba(14, 165, 233, 0.14);
+  --dsw-alias-interactive-bg-hover-accent: rgba(14, 165, 233, 0.16);
+  --dsw-alias-label-primary-bluish: rgb(11, 59, 102);
+  --dsw-alias-scrollbar-bg-l1: rgba(14, 165, 233, 0.4);
+  --dsw-alias-scrollbar-bg-l2: rgba(14, 165, 233, 0.5);
+  --dsw-alias-scrollbar-hover-l1: rgba(12, 142, 212, 0.6);
+  --dsw-alias-scrollbar-hover-l2: rgba(12, 142, 212, 0.7);
+  --dsw-alias-state-business-primary: rgb(14, 165, 233);
+  --dsw-alias-state-business-tertiary: rgb(227, 240, 253);
+  --dsw-specific-bubble-highlight: rgb(214, 236, 252);
+  --dsw-specific-bubble: rgb(234, 245, 253);
+  --dsw-specific-sidebar-fill: rgb(241, 247, 252);
+  --dsw-specific-sidebar-nav-item-active: rgb(224, 238, 250);
+  --dsw-specific-sidebar-nav-item-hover: rgb(241, 247, 252);
+}
+
+body[data-dsh-palette="ocean"][data-ds-dark-theme] {
+  --dsw-alias-bg-base: rgb(10, 18, 34);
+  --dsw-alias-bg-layer-1: rgb(15, 26, 46);
+  --dsw-alias-bg-layer-2: rgb(20, 33, 56);
+  --dsw-alias-bg-layer-3: rgb(26, 41, 66);
+  --dsw-alias-bg-mask-drop: rgba(10, 18, 34, 0.7);
+  --dsw-alias-bg-module-platform: rgb(26, 41, 66);
+  --dsw-alias-bg-multi-select: rgb(20, 33, 56);
+  --dsw-alias-bg-overlay: rgb(40, 60, 92);
+  --dsw-alias-brand-primary-new-colorprimary-new-color: rgb(56, 189, 248);
+  --dsw-alias-brand-primary: rgb(56, 189, 248);
+  --dsw-alias-brand-text: rgb(224, 238, 252);
+  --dsw-alias-button-info-fill: rgb(14, 165, 233);
+  --dsw-alias-button-info-hover: rgb(56, 189, 248);
+  --dsw-alias-button-primary-dimmed: rgb(16, 34, 58);
+  --dsw-alias-button-primary-fill: rgb(14, 165, 233);
+  --dsw-alias-button-primary-hover: rgb(56, 189, 248);
+  --dsw-alias-interactive-bg-hover-accent: rgba(56, 189, 248, 0.16);
+  --dsw-alias-label-primary-bluish: rgb(224, 238, 252);
+  --dsw-alias-scrollbar-bg-l1: rgba(56, 189, 248, 0.4);
+  --dsw-alias-scrollbar-bg-l2: rgba(56, 189, 248, 0.5);
+  --dsw-alias-scrollbar-hover-l1: rgba(90, 205, 255, 0.6);
+  --dsw-alias-scrollbar-hover-l2: rgba(90, 205, 255, 0.7);
+  --dsw-alias-state-business-primary: rgb(56, 189, 248);
+  --dsw-alias-state-business-tertiary: rgb(16, 34, 58);
+  --dsw-specific-bubble-highlight: rgb(22, 38, 62);
+  --dsw-specific-bubble: rgb(16, 28, 48);
+  --dsw-specific-sidebar-fill: rgb(12, 22, 40);
+  --dsw-specific-sidebar-nav-item-active: rgb(30, 50, 80);
+  --dsw-specific-sidebar-nav-item-hover: rgb(15, 26, 46);
+}

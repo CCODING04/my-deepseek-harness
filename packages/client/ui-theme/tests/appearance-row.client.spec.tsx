@@ -18,6 +18,10 @@ const COPY: Record<string, string> = {
   'appearance.dark': 'Dark',
   'appearance.system': 'System',
   'appearance.decorations': 'Poké ornaments (stickers & art)',
+  'appearance.palette': 'Palette',
+  'appearance.palette.classic': 'Pokéball Red',
+  'appearance.palette.gengar': 'Gengar Violet',
+  'appearance.palette.ocean': 'Ocean Blue',
 }
 
 /** Empty global standard-kit hooks (the row reads neither). */
@@ -37,9 +41,10 @@ function emptyWorkspaces() {
 function mount(preference: ThemePreference = 'system') {
   // Real store instance — the sanctioned zero-machinery path for tests.
   const store = createAppearanceRowStore().create()
-  store.actions.sync(preference, true, 0)
+  store.actions.sync(preference, true, 'classic', 0)
   const setTheme = vi.fn()
   const setDecorations = vi.fn()
+  const setPalette = vi.fn()
   const props: AppearanceRowComponentProps = {
     useSessions: emptySessions(),
     useWorkspaces: emptyWorkspaces(),
@@ -48,9 +53,10 @@ function mount(preference: ThemePreference = 'system') {
     t: (key: string) => COPY[key] ?? key,
     setTheme,
     setDecorations,
+    setPalette,
   }
   render(<AppearanceRow {...props} />)
-  return { store, setTheme, setDecorations }
+  return { store, setTheme, setDecorations, setPalette }
 }
 
 const pressed = (name: RegExp): string | null =>
@@ -71,7 +77,7 @@ describe('AppearanceRow', () => {
     expect(b.setTheme).toHaveBeenCalledWith('light')
     // No store write yet: selection is unchanged.
     expect(pressed(/Dark/)).toBe('true')
-    act(() => { b.store.actions.sync('light', true, 1) })
+    act(() => { b.store.actions.sync('light', true, 'classic', 1) })
     expect(pressed(/Light/)).toBe('true')
     expect(pressed(/Dark/)).toBe('false')
   })
@@ -82,5 +88,18 @@ describe('AppearanceRow', () => {
     expect(toggle.getAttribute('aria-pressed')).toBe('true')
     fireEvent.click(toggle)
     expect(b.setDecorations).toHaveBeenCalledWith(false)
+  })
+
+  it('renders the palette row with classic selected and drives setPalette', () => {
+    const b = mount('system')
+    expect(pressed(/Pokéball Red/)).toBe('true')
+    expect(pressed(/Gengar Violet/)).toBe('false')
+    fireEvent.click(screen.getByRole('button', { name: /Gengar Violet/ }))
+    expect(b.setPalette).toHaveBeenCalledWith('gengar')
+    // No store write yet: selection is unchanged.
+    expect(pressed(/Pokéball Red/)).toBe('true')
+    act(() => { b.store.actions.sync('system', true, 'gengar', 1) })
+    expect(pressed(/Gengar Violet/)).toBe('true')
+    expect(pressed(/Pokéball Red/)).toBe('false')
   })
 })

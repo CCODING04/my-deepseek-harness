@@ -112,6 +112,33 @@ describe('ContextMeter', () => {
     expect(panel.getElementsByClassName(segmentClass)).toHaveLength(1)
   })
 
+  it('shows the runway footer once billing and turn counts are known', () => {
+    const view = meter({
+      contextPressure: { pressureTokens: 96_000, contextWindow: 128_000 },
+      tokenUsage: { uncachedInputTokens: 18_000, cacheReadTokens: 2_000, cacheWriteTokens: 0, outputTokens: 0 },
+      sessionStats: { turns: 10 },
+    })
+    fireEvent.click(view.getByRole('button', { name: '上下文已用 75%' }))
+    const panel = view.container.querySelector('[role="dialog"]')!
+    // Remaining 32K; 20K billed over 10 turns → 2K/turn → 16 turns.
+    expect(panel.textContent).toContain('剩余 ~32K')
+    expect(panel.textContent).toContain('约 16 轮')
+  })
+
+  it('omits the runway footer while billing or turn counts are unknown', () => {
+    // No token usage: remaining tokens are known but no per-turn average exists.
+    const noUsage = meter({ contextPressure: { pressureTokens: 32_000, contextWindow: 128_000 } })
+    fireEvent.click(noUsage.getByRole('button', { name: '上下文已用 25%' }))
+    expect(noUsage.container.querySelector('[role="dialog"]')!.textContent).not.toContain('剩余')
+    // No session stats either.
+    const noTurns = meter({
+      contextPressure: { pressureTokens: 40_000, contextWindow: 128_000 },
+      tokenUsage: { uncachedInputTokens: 18_000, cacheReadTokens: 2_000, cacheWriteTokens: 0, outputTokens: 0 },
+    })
+    fireEvent.click(noTurns.getByRole('button', { name: '上下文已用 31%' }))
+    expect(noTurns.container.querySelector('[role="dialog"]')!.textContent).not.toContain('剩余')
+  })
+
   it('closes when capacity disappears and stays closed when it returns', () => {
     let values: Record<string, unknown> = {
       contextPressure: { pressureTokens: 32_000, contextWindow: 128_000 },

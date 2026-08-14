@@ -10,7 +10,7 @@ import {
   IconDarkOutline16, IconFollowsystemOutline16, IconLightOutline16,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
-import type { ThemePreference } from '../theme-settings.ts'
+import type { ThemePalette, ThemePreference } from '../theme-settings.ts'
 import type { ThemeKey } from './locales.ts'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { createAppearanceRowStore } from './settings-store.ts'
@@ -22,6 +22,8 @@ export interface AppearanceRowInjected {
   setTheme: (id: ThemePreference) => void
   /** Toggle the Poké ornaments layer. */
   setDecorations: (value: boolean) => void
+  /** Switch the color palette. */
+  setPalette: (value: ThemePalette) => void
 }
 
 /** Full component props: runtime share + store share + locale seat + injected face. */
@@ -36,14 +38,22 @@ const CUBES: readonly { id: ThemePreference; labelKey: ThemeKey; Icon: typeof Ic
   { id: 'system', labelKey: 'appearance.system', Icon: IconFollowsystemOutline16 },
 ]
 
+/** Palette order with their swatch tint (the Pokéball trio of palettes). */
+const PALETTES: readonly { id: ThemePalette; labelKey: ThemeKey; swatch: string | undefined }[] = [
+  { id: 'classic', labelKey: 'appearance.palette.classic', swatch: css.swatchClassic },
+  { id: 'gengar', labelKey: 'appearance.palette.gengar', swatch: css.swatchGengar },
+  { id: 'ocean', labelKey: 'appearance.palette.ocean', swatch: css.swatchOcean },
+]
+
 /**
  * Render the Appearance row.
  * @param props - composed slot props.
  * @returns the row element tree.
  */
-export function AppearanceRow({ t, setTheme, setDecorations, useStore }: AppearanceRowComponentProps) {
+export function AppearanceRow({ t, setTheme, setDecorations, setPalette, useStore }: AppearanceRowComponentProps) {
   const preference = useStore(s => s.preference)
   const decorations = useStore(s => s.decorations)
+  const palette = useStore(s => s.palette)
   return (
     <div className={css.group}>
       <div className={css.title}>{t('appearance.title')}</div>
@@ -61,10 +71,26 @@ export function AppearanceRow({ t, setTheme, setDecorations, useStore }: Appeara
           </button>
         ))}
       </div>
+      <div className={css.title}>{t('appearance.palette')}</div>
+      <div className={css.cubeRow}>
+        {PALETTES.map(({ id, labelKey, swatch }) => (
+          <button
+            key={id}
+            type="button"
+            className={clsx(css.themeCube, palette === id && css.selected)}
+            aria-pressed={palette === id}
+            onClick={() => { setPalette(id) }}
+          >
+            <span className={swatch} aria-hidden />
+            {t(labelKey)}
+          </button>
+        ))}
+      </div>
       <div className={css.decorRow}>
         <button
           type="button"
           className={clsx(css.decorToggle, decorations && css.decorToggleOn)}
+          aria-label={t('appearance.decorations')}
           aria-pressed={decorations}
           onClick={() => { setDecorations(!decorations) }}
         >

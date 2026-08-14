@@ -7,10 +7,12 @@
 import { useEffect, useRef, useState } from 'react'
 import type { UseProjection } from '@deepseek-ai/dsh-client-runtime/client'
 // Type-only: the `contextPressure` / `contextBreakdown` projection key merges.
-import type {} from '@deepseek-ai/dsh-token-meter/client'
+import type { TokenUsageProjection } from '@deepseek-ai/dsh-token-meter/client'
+// Type-only: merges the sessionStats key into SessionProjectionMap.
+import type {} from '@deepseek-ai/dsh-session-stats/client'
 import { Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ComposerBarProps } from '../contract/slots.ts'
-import { contextOccupancy, formatTokens } from '../chat/StatsLine.tsx'
+import { billedInputTokens, contextOccupancy, formatTokens } from '../chat/StatsLine.tsx'
 import css from './ContextMeter.module.css'
 
 /** Ring geometry: 14px viewBox, 2px stroke. */
@@ -37,13 +39,45 @@ export interface ContextMeterProps {
   t: ComposerBarProps['t']
 }
 
+/**
+ * Rough "how much runway is left": remaining context tokens, and — once the
+ * whole-log billing and turn counts are known — an estimate of how many more
+ * turns the current average burn per turn would support. Deliberately a
+ * projection reference figure (same caveat as contextOccupancy): the average
+ * burn rides billed input over closed turns, so early sessions read as
+ * generous and a turn that hammers tools narrows it fast.
+ * @param context - occupancy figure from contextOccupancy.
+ * @param usage - the session's token-usage projection value.
+ * @param turns - closed turns counted by the session-stats projection.
+ * @returns display strings, or null when the capacity is unknown.
+ */
+export function remainingRunway(
+  context: { usedTokens: number; contextWindow: number } | null,
+  usage: TokenUsageProjection | undefined,
+  turns: number | undefined,
+): { leftTokens: string; turns: number } | null {
+  if (context === null) return null
+  const remaining = context.contextWindow - context.usedTokens
+  const billed = usage === undefined ? 0 : billedInputTokens(usage)
+  if (billed <= 0 || turns === undefined || turns <= 0 || remaining <= 0) return null
+  const averagePerTurn = billed / turns
+  if (averagePerTurn <= 0) return null
+  return {
+    leftTokens: formatTokens(remaining),
+    turns: Math.max(1, Math.floor(remaining / averagePerTurn)),
+  }
+}
+
 export function ContextMeter({ useProjection, t }: ContextMeterProps) {
   const pressure = useProjection('contextPressure')
   const breakdown = useProjection('contextBreakdown')
+  const usage = useProjection('tokenUsage')
+  const sessionStats = useProjection('sessionStats')
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLSpanElement | null>(null)
   const context = contextOccupancy(pressure)
   const available = context !== null
+  const runway = remainingRunway(context, usage, sessionStats?.turns)
 
   // A model switch can temporarily remove capacity while this component stays
   // mounted. Close the now-unavailable panel instead of preserving stale UI.
@@ -145,6 +179,13 @@ export function ContextMeter({ useProjection, t }: ContextMeterProps) {
                 </div>
               ))}
             </dl>
+          )}
+          {runway !== null && (
+            <div className={css.footer}>
+              {t('context.left', { tokens: runway.leftTokens })}
+              {' · '}
+              {t('context.turns', { turns: runway.turns })}
+            </div>
           )}
         </div>
       )}

@@ -145,3 +145,15 @@
   font-variant-numeric: tabular-nums;
   color: var(--dsw-alias-label-primary);
 }
+
+/* Runway footer: remaining context tokens + rough turns the average burn
+   would support, separated from the breakdown by a hairline. */
+.footer {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-secondary);
+}

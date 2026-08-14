@@ -50,17 +50,17 @@ describe('ThemeRuntime', () => {
 
   it('adopts a published Host section without writing it back', () => {
     const { theme, events, host } = make()
-    host.publish({ status: 'ready', value: { preference: 'dark', decorations: true }, revision: 1, writable: true })
+    host.publish({ status: 'ready', value: { preference: 'dark', decorations: true, palette: 'classic' }, revision: 1, writable: true })
     expect(theme.getTheme().preference).toBe('dark')
     expect(events).toHaveLength(1)
     expect(host.set).not.toHaveBeenCalled()
-    host.publish({ value: { preference: 'dark', decorations: true }, revision: 2 })
+    host.publish({ value: { preference: 'dark', decorations: true, palette: 'classic' }, revision: 2 })
     expect(events).toHaveLength(1)
   })
 
   it('adopts a section already standing at construction', () => {
     const host = stubSettingsScope<ThemeSettings>()
-    host.publish({ status: 'ready', value: { preference: 'dark', decorations: true }, revision: 1, writable: true })
+    host.publish({ status: 'ready', value: { preference: 'dark', decorations: true, palette: 'classic' }, revision: 1, writable: true })
     const { theme } = make(host)
     expect(theme.getTheme().preference).toBe('dark')
   })

@@ -20,14 +20,15 @@ import { AppearanceRow } from './AppearanceRow.tsx'
 import { createAppearanceRowStore } from './settings-store.ts'
 import { en, zh, type ThemeKey } from './locales.ts'
 import {
-  DECORATIONS_FIELD, DEFAULT_PREFERENCE, isThemePreference, THEME_PREFERENCE_FIELD, THEME_SETTINGS_NAMESPACE,
-  type ThemePreference, type ThemeSettings,
+  DECORATIONS_FIELD, DEFAULT_PALETTE, DEFAULT_PREFERENCE, isThemePreference,
+  PALETTE_FIELD, THEME_PREFERENCE_FIELD, THEME_SETTINGS_NAMESPACE,
+  type ThemePalette, type ThemePreference, type ThemeSettings,
 } from '../theme-settings.ts'
 
 export type { AppearanceRowComponentProps, AppearanceRowInjected } from './AppearanceRow.tsx'
 export type { AppearanceRowState } from './settings-store.ts'
 export type { ThemeKey } from './locales.ts'
-export type { ThemePreference, ThemeSettings } from '../theme-settings.ts'
+export type { ThemePalette, ThemePreference, ThemeSettings } from '../theme-settings.ts'
 
 /** Namespace owning this feature's settings-row copy. */
 export const SETTINGS_NS = 'settings.theme'
@@ -400,17 +401,30 @@ export function apply(ctx: ClientContext): void {
       document.body.toggleAttribute('data-dsh-no-decor', !value)
     }
   }
+  // Color palette: persisted beside the preference; applied to the body
+  // attribute the token-sheet palette overrides gate on. Classic (the default)
+  // leaves the attribute off so the base sheets stay untouched.
+  let palette: ThemePalette = DEFAULT_PALETTE
+  const applyPalette = (value: ThemePalette): void => {
+    palette = value
+    if (typeof document !== 'undefined') {
+      if (value === DEFAULT_PALETTE) document.body.removeAttribute('data-dsh-palette')
+      else document.body.setAttribute('data-dsh-palette', value)
+    }
+  }
   applyDecorations(host.getSnapshot().value?.decorations ?? true)
+  applyPalette(host.getSnapshot().value?.palette ?? DEFAULT_PALETTE)
   const sync = (snapshot: ThemeSnapshot): void => {
-    bound?.sync(snapshot.preference, decorations, snapshot.revision)
+    bound?.sync(snapshot.preference, decorations, palette, snapshot.revision)
   }
   ctx.on('theme/change', sync)
   ctx.effect(() => host.subscribe(() => {
     const value = host.getSnapshot().value
     applyDecorations(value?.decorations ?? true)
+    applyPalette(value?.palette ?? DEFAULT_PALETTE)
     // Re-sync so the row reflects the toggled state immediately (the theme
     // revision guard drops stale duplicates).
-    bound?.sync(theme.getTheme().preference, decorations, theme.getTheme().revision)
+    bound?.sync(theme.getTheme().preference, decorations, palette, theme.getTheme().revision)
   }), 'ui-theme: decorations adoption')
   const injected = (actions: BoundActions<typeof store>): AppearanceRowInjected => {
     bound = actions
@@ -420,6 +434,7 @@ export function apply(ctx: ClientContext): void {
     return {
       setTheme: (id) => { theme.setTheme(id) },
       setDecorations: (value) => { void host.set(DECORATIONS_FIELD, value) },
+      setPalette: (value) => { void host.set(PALETTE_FIELD, value) },
     }
   }
   ctx.slots.inject('settings.general.item', () => ctx.slots.register({

@@ -28,6 +28,14 @@
   z-index: -1;
 }
 
+/* Buddy + switcher sit on one row; the switcher is a small badge tucked at
+   the buddy's bottom-right corner (Menu wraps it for the anchor rect). */
+.row {
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+}
+
 .buddy {
   display: block;
   width: 92px;
@@ -42,6 +50,86 @@
 
 .buddy:hover .art {
   transform: scale(1.05);
+}
+
+.switcher {
+  position: absolute;
+  right: 4px;
+  bottom: 10px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--dsw-alias-border-l3);
+  border-radius: 50%;
+  background: var(--dsw-alias-bg-layer-3);
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.switcher:hover {
+  background: var(--dsw-alias-bg-module-platform);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* Mood bubble: floats above the buddy with a little tail; heart/celebrate
+   variants tint the copy so the three moods read apart at a glance. */
+.bubble {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 6px);
+  transform: translateX(-50%);
+  z-index: 3;
+  padding: 3px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-3);
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+  animation: pet-bubble-in 200ms ease-out;
+}
+
+.bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 8px;
+  height: 8px;
+  transform: translateX(-50%) rotate(45deg);
+  border-right: 1px solid var(--dsw-alias-border-l2);
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-3);
+}
+
+.bubbleHeart {
+  color: var(--dsw-static-red-600);
+  border-color: var(--dsw-static-red-400);
+  font-weight: 700;
+}
+
+.bubbleCelebrate {
+  background: var(--dsw-static-yellow-400);
+  border-color: var(--dsw-static-yellow-500);
+  color: var(--dsw-static-neutral-900);
+}
+
+.bubbleCelebrate::after {
+  background: var(--dsw-static-yellow-400);
+  border-color: var(--dsw-static-yellow-500);
+}
+
+@keyframes pet-bubble-in {
+  from { opacity: 0; transform: translate(-50%, 6px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
 }
 
 .art {
@@ -105,6 +193,22 @@
   0%, 100% { transform: translateX(0) rotate(0deg); }
   35% { transform: translateX(-3px) rotate(-4deg); }
   70% { transform: translateX(3px) rotate(4deg); }
+}
+
+/* One-shot jump (petting / run-finished celebration): defined last so it
+   overrides the pose loop while active, then hands back to the pose. */
+.art[data-mood='jump'] {
+  animation-name: pet-jump;
+  animation-duration: 0.7s;
+  animation-iteration-count: 1;
+}
+
+@keyframes pet-jump {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-16px) scale(1.1); }
+  55% { transform: translateY(0) scale(0.94); }
+  75% { transform: translateY(-7px) scale(1.04); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 @media (max-width: 880px) {
