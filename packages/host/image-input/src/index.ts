@@ -267,9 +267,24 @@ export function apply(ctx: Context, config: Config): void {
   // ctx.get here could silently miss it and the WebUI card would never see the
   // namespace.
   ctx.inject(['settings'], (settingsCtx) => {
-    settingsCtx.settings.register(settingsNamespace(SETTINGS_NS), VisionSettingsSchema)
-    const stored = settingsCtx.settings.get(settingsNamespace(SETTINGS_NS)) as VisionSettings | undefined
-    if (stored?.providers !== undefined && stored.providers.length > 0) {
+    const registry = settingsCtx.settings.register(settingsNamespace(SETTINGS_NS), VisionSettingsSchema)
+    const stored = registry.get() as VisionSettings | undefined
+    if (stored === undefined || stored.providers === undefined || stored.providers.length === 0) {
+      // Seed the section with the resolved defaults (e.g. the shared Qwen-MM
+      // config's provider) so the WebUI card shows and edits them instead of
+      // an empty list. Keys stay blank: an empty key falls back to the shared
+      // config file, so no secret is duplicated into settings.yaml.
+      const seed = providers.map(provider => ({
+        name: provider.name,
+        endpoint: provider.endpoint,
+        apiKey: '',
+        model: provider.model,
+        maxTokens: provider.maxTokens,
+        usesMaxCompletionTokens: provider.usesMaxCompletionTokens,
+        authHeader: provider.authHeader,
+      }))
+      void registry.update({ providers: seed })
+    } else {
       providers = stored.providers.map(provider => ({
         name: provider.name || provider.model,
         endpoint: provider.endpoint.replace(/\/+$/, ''),
