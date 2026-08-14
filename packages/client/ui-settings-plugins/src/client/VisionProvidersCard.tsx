@@ -1,5 +1,6 @@
-/* The vision-supplier card: ordered provider list with add/move/remove plus
-   a compact add form. Order is priority; the first entry is the default. */
+/* The vision-supplier card: ordered provider list with add/edit/move/remove
+   plus a compact form. Order is priority; the first entry is the default.
+   The API-key control is masked by default with an eye toggle. */
 
 import { useState } from 'react'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
@@ -32,15 +33,41 @@ export function VisionProvidersCard(props: VisionProvidersCardProps) {
   const state = props.useVisionProviders(snapshot => snapshot)
   const [form, setForm] = useState<VisionProviderEntry>(blankEntry)
   const [showForm, setShowForm] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [showKey, setShowKey] = useState(false)
 
   if (!state.available) return null
   const disabled = !state.writable
+  const editing = editingIndex !== null
 
-  const add = (): void => {
-    if (form.endpoint.trim() === '' || form.model.trim() === '') return
-    props.actions.add({ ...form, name: form.name.trim() || form.model.trim() })
+  const openAdd = (): void => {
     setForm(blankEntry())
+    setEditingIndex(null)
+    setShowKey(false)
+    setShowForm(true)
+  }
+
+  const openEdit = (index: number): void => {
+    const entry = state.draft[index]
+    if (entry === undefined) return
+    setForm({ ...entry })
+    setEditingIndex(index)
+    setShowKey(false)
+    setShowForm(true)
+  }
+
+  const cancelForm = (): void => {
     setShowForm(false)
+    setEditingIndex(null)
+    setShowKey(false)
+    setForm(blankEntry())
+  }
+
+  const submit = (): void => {
+    if (form.endpoint.trim() === '' || form.model.trim() === '') return
+    if (editingIndex !== null) props.actions.edit(editingIndex, form)
+    else props.actions.add({ ...form, name: form.name.trim() || form.model.trim() })
+    cancelForm()
   }
 
   return (
@@ -67,6 +94,8 @@ export function VisionProvidersCard(props: VisionProvidersCardProps) {
               onClick={() => { props.actions.move(index, -1) }}>↑</button>
             <button type="button" disabled={disabled || index === state.draft.length - 1} title={t('visionDown')}
               onClick={() => { props.actions.move(index, 1) }}>↓</button>
+            <button type="button" disabled={disabled} title={t('visionEdit')}
+              onClick={() => { openEdit(index) }}>✎</button>
             <button type="button" disabled={disabled} title={t('visionRemove')}
               onClick={() => { props.actions.remove(index) }}>✕</button>
           </div>
@@ -75,6 +104,7 @@ export function VisionProvidersCard(props: VisionProvidersCardProps) {
 
       {showForm ? (
         <div className={css.form}>
+          <div className={css.formTitle}>{editing ? t('visionEditSupplier') : t('visionAddSupplierTitle')}</div>
           <div className={css.formGrid}>
             <input
               className={css.input}
@@ -97,14 +127,24 @@ export function VisionProvidersCard(props: VisionProvidersCardProps) {
               disabled={disabled}
               onChange={(e) => { setForm({ ...form, model: e.target.value }) }}
             />
-            <input
-              className={css.input}
-              placeholder={t('visionKey')}
-              type="password"
-              value={form.apiKey}
-              disabled={disabled}
-              onChange={(e) => { setForm({ ...form, apiKey: e.target.value }) }}
-            />
+            <div className={css.keyWrap}>
+              <input
+                className={css.input}
+                placeholder={t('visionKey')}
+                type={showKey ? 'text' : 'password'}
+                value={form.apiKey}
+                disabled={disabled}
+                onChange={(e) => { setForm({ ...form, apiKey: e.target.value }) }}
+              />
+              <button
+                type="button"
+                className={css.eyeBtn}
+                title={showKey ? t('visionHideKey') : t('visionShowKey')}
+                onClick={() => { setShowKey(!showKey) }}
+              >
+                {showKey ? '🙈' : '👁'}
+              </button>
+            </div>
           </div>
           <label className={css.check}>
             <input
@@ -116,13 +156,16 @@ export function VisionProvidersCard(props: VisionProvidersCardProps) {
             {t('visionMaxCompletion')}
           </label>
           <div className={css.formActions}>
-            <button type="button" className={css.addBtn} disabled={disabled} onClick={add}>{t('visionAdd')}</button>
-            <button type="button" className={css.cancelBtn} disabled={disabled}
-              onClick={() => { setShowForm(false); setForm(blankEntry()) }}>{t('cancel')}</button>
+            <button type="button" className={css.addBtn} disabled={disabled} onClick={submit}>
+              {editing ? t('visionSaveEdit') : t('visionAdd')}
+            </button>
+            <button type="button" className={css.cancelBtn} disabled={disabled} onClick={cancelForm}>
+              {t('cancel')}
+            </button>
           </div>
         </div>
       ) : (
-        <button type="button" className={css.addBtn} disabled={disabled} onClick={() => { setShowForm(true) }}>
+        <button type="button" className={css.addBtn} disabled={disabled} onClick={openAdd}>
           {t('visionAddSupplier')}
         </button>
       )}

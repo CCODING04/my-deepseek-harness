@@ -94,6 +94,41 @@
   margin: 6px 0;
 }
 
+.formTitle {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.keyWrap {
+  position: relative;
+  min-width: 0;
+}
+
+.keyWrap .input {
+  width: 100%;
+  padding-right: 32px;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.eyeBtn:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
 .formGrid {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr 1.4fr;

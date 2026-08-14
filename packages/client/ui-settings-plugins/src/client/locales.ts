@@ -13,9 +13,11 @@ export type PluginsSettingsLocaleKey =
   | 'webSearchApiKey' | 'webSearchApiKeyHint' | 'webSearchApiKeySet' | 'webSearchApiKeyUnset'
   | 'webSearchBaseUrl' | 'webSearchBaseUrlHint' | 'webSearchMaxUses' | 'webSearchMaxUsesHint'
   | 'visionTitle' | 'visionDescription' | 'visionEmpty'
-  | 'visionDefault' | 'visionUp' | 'visionDown' | 'visionRemove'
+  | 'visionDefault' | 'visionUp' | 'visionDown' | 'visionRemove' | 'visionEdit'
   | 'visionName' | 'visionEndpoint' | 'visionModel' | 'visionKey'
   | 'visionMaxCompletion' | 'visionAdd' | 'visionAddSupplier'
+  | 'visionEditSupplier' | 'visionAddSupplierTitle' | 'visionSaveEdit'
+  | 'visionShowKey' | 'visionHideKey'
 
 /** English copy. */
 export const en: Record<PluginsSettingsLocaleKey, string> = {
@@ -71,6 +73,12 @@ export const en: Record<PluginsSettingsLocaleKey, string> = {
   visionMaxCompletion: 'Use max_completion_tokens (MiMo)',
   visionAdd: 'Add',
   visionAddSupplier: 'Add supplier',
+  visionEdit: 'Edit',
+  visionEditSupplier: 'Edit supplier',
+  visionAddSupplierTitle: 'New supplier',
+  visionSaveEdit: 'Save changes',
+  visionShowKey: 'Show key',
+  visionHideKey: 'Hide key',
 }
 
 /** Simplified Chinese copy. */
@@ -127,4 +135,10 @@ export const zh: Record<PluginsSettingsLocaleKey, string> = {
   visionMaxCompletion: '使用 max_completion_tokens（MiMo）',
   visionAdd: '添加',
   visionAddSupplier: '添加供应商',
+  visionEdit: '编辑',
+  visionEditSupplier: '编辑供应商',
+  visionAddSupplierTitle: '新增供应商',
+  visionSaveEdit: '保存修改',
+  visionShowKey: '显示密钥',
+  visionHideKey: '隐藏密钥',
 }
