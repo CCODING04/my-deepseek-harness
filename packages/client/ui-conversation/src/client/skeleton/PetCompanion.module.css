@@ -1,0 +1,120 @@
+/* Composer pet companion: floats just outside the card's bottom-left corner
+   so the buddy reads as sitting beside the input. Sized to match the resting
+   composer height (~96px) so the buddy and the input card read as one unit.
+   The art swaps poses (idle/typing/working) via data-pose animation classes;
+   narrow viewports hide the buddy so it never overlaps the message column or
+   sidebar. */
+
+.anchor {
+  position: absolute;
+  left: -106px;
+  bottom: -2px;
+  z-index: 2;
+}
+
+/* Grounding shadow: a soft ellipse under the buddy so it reads as standing
+   beside the card instead of floating over it. */
+.anchor::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 4px;
+  bottom: 0;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--dsw-static-neutral-1000) 34%, transparent) 0%,
+    transparent 72%);
+  z-index: -1;
+}
+
+.buddy {
+  display: block;
+  width: 92px;
+  height: 92px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  outline-offset: 2px;
+}
+
+.buddy:hover .art {
+  transform: scale(1.05);
+}
+
+.art {
+  display: block;
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  /* gpt-image-2 art ships on a white plate; the round clip turns it into a
+     clean circular avatar. Transparent sprite art is unaffected. */
+  border-radius: 50%;
+  filter: drop-shadow(0 8px 18px rgba(238, 21, 21, 0.2));
+  transition: transform 150ms var(--ds-ease-in-out);
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Back / animated battle sprites are 96px pixel art shown at 48px; keep the
+   pixels crisp instead of smoothing them. */
+.art[data-pose='typing'],
+.art[data-pose='working'] {
+  image-rendering: pixelated;
+}
+
+.menuIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* idle: slow breathing */
+.art[data-pose='idle'] {
+  animation-name: pet-breathe;
+  animation-duration: 3.2s;
+}
+
+@keyframes pet-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* typing: quick input wiggle */
+.art[data-pose='typing'] {
+  animation-name: pet-typing;
+  animation-duration: 0.55s;
+}
+
+@keyframes pet-typing {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(-3deg); }
+  75% { transform: translateY(1px) rotate(3deg); }
+}
+
+/* working: thinking sway */
+.art[data-pose='working'] {
+  animation-name: pet-working;
+  animation-duration: 1.1s;
+}
+
+@keyframes pet-working {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  35% { transform: translateX(-3px) rotate(-4deg); }
+  70% { transform: translateX(3px) rotate(4deg); }
+}
+
+@media (max-width: 880px) {
+  .anchor {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art {
+    animation: none;
+  }
+}

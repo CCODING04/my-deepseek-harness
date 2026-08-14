@@ -8,7 +8,12 @@
   height: 100%;
   min-width: 0;
   border-left: 1px solid var(--dsw-alias-border-l2);
-  background: var(--dsw-alias-bg-base);
+  /* Pokémon theme: a faint Pikachu-yellow wash over the panel top. */
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--dsw-static-yellow-500) 5%, transparent) 0%,
+      transparent 240px),
+    var(--dsw-alias-bg-base);
 }
 
 /* figma RightSidebar header frame (I54:42735;43:36451): pad 14/12/12/12, gap 8. */

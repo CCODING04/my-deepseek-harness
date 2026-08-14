@@ -31,6 +31,7 @@ import {
 } from '../image-labels.ts'
 import { ContextMeter } from './ContextMeter.tsx'
 import { PermissionSelect } from './PermissionSelect.tsx'
+import { PetCompanion } from './PetCompanion.tsx'
 import css from './InputBar.module.css'
 
 /** Decoration product of the no-session state (no machine, empty draft). */
@@ -674,6 +675,7 @@ export function InputBar({
         onClick={workspaceTrigger ? onRequestWorkspace : undefined}
         onPointerDown={workspaceTrigger ? (e) => { e.stopPropagation() } : undefined}
       >
+        <PetCompanion running={running} draft={draft} />
         {overlay !== undefined && <div className={css.overlayAnchor}>{overlay}</div>}
         {accessory !== undefined && <div className={css.accessory}>{accessory}</div>}
         {railItems.length > 0 && (
@@ -765,8 +767,10 @@ export function InputBar({
                   onMouseDown={keepFocus}
                   onClick={stop}
                 >
+                  {/* Pokéball stop: white center button with a dark square. */}
                   <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>
-                    <rect x="3" y="3" width="10" height="10" rx="3" fill="currentColor" />
+                    <circle cx="8" cy="8" r="7.4" fill="#ffffff" stroke="#1f1f1f" strokeWidth="1.6" />
+                    <rect x="5.4" y="5.4" width="5.2" height="5.2" rx="1.4" fill="#1f1f1f" />
                   </svg>
                 </button>
               </Tooltip>
@@ -782,11 +786,13 @@ export function InputBar({
               >
                 {primaryStops ? (
                   <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>
-                    <rect x="3" y="3" width="10" height="10" rx="3" fill="currentColor" />
+                    <circle cx="8" cy="8" r="7.4" fill="#ffffff" stroke="#1f1f1f" strokeWidth="1.6" />
+                    <rect x="5.4" y="5.4" width="5.2" height="5.2" rx="1.4" fill="#1f1f1f" />
                   </svg>
                 ) : (
                   <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>
-                    <path d="M8.3125 0.980183C8.66767 1.0531 8.97902 1.20418 9.2627 1.43233C9.48724 1.61297 9.73029 1.85793 9.97949 2.10714L14.707 6.83468L13.293 8.24874L9 3.95577V15.0417H7V3.95577L2.70703 8.24874L1.29297 6.83468L6.02051 2.10714C6.26971 1.85793 6.51277 1.61297 6.7373 1.43233C6.97662 1.23986 7.28445 1.04402 7.6875 0.980183C7.8973 0.947006 8.1031 0.95516 8.3125 0.980183Z" fill="currentColor" />
+                    <circle cx="8" cy="8" r="7.4" fill="#ffffff" stroke="#1f1f1f" strokeWidth="1.6" />
+                    <path d="M8.5 4.1 L12.4 8 L8.5 11.9 V9.4 H3.6 V6.6 H8.5 Z" fill="#1f1f1f" />
                   </svg>
                 )}
               </button>

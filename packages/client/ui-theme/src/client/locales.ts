@@ -6,6 +6,7 @@ export const zh = {
   'appearance.light': '浅色',
   'appearance.dark': '深色',
   'appearance.system': '跟随系统',
+  'appearance.decorations': 'Poké 装饰(挂件与背景)',
 } satisfies Record<string, string>
 
 /** The settings.theme namespace key union. */
@@ -17,4 +18,5 @@ export const en = {
   'appearance.light': 'Light',
   'appearance.dark': 'Dark',
   'appearance.system': 'System',
+  'appearance.decorations': 'Poké ornaments (stickers & art)',
 } satisfies Record<ThemeKey, string>

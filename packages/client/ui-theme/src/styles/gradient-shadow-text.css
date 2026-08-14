@@ -1,6 +1,6 @@
 body {
-  --dsw-linear-gradient-think: linear-gradient(180deg, #fff 20.19%, rgba(255, 255, 255, 0) 100%);
-  --dsw-linear-think-select: linear-gradient(180deg, #f5f6f7 20.19%, rgba(245, 246, 247, 0) 100%);
+  --dsw-linear-gradient-think: linear-gradient(180deg, #fbf8f1 20.19%, rgba(251, 248, 241, 0) 100%);
+  --dsw-linear-think-select: linear-gradient(180deg, #f3eee2 20.19%, rgba(243, 238, 226, 0) 100%);
   /* 阴影 */
   --dsw-shadow-lv1: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
   --dsw-shadow-lv1-blur: 0 4px 12px 0 rgba(0, 0, 0, 0.02);
@@ -12,29 +12,29 @@ body {
 }
 
 body[data-ds-dark-theme] {
-  --dsw-linear-gradient-think: linear-gradient(180deg, #151517 20.19%, rgba(21, 21, 23, 0) 100%);
-  --dsw-linear-think-select: linear-gradient(180deg, #232325 20.19%, rgba(35, 35, 37, 0) 100%);
+  --dsw-linear-gradient-think: linear-gradient(180deg, #0d1020 20.19%, rgba(13, 16, 32, 0) 100%);
+  --dsw-linear-think-select: linear-gradient(180deg, #191d2f 20.19%, rgba(25, 29, 47, 0) 100%);
 }
 
 /* ---------- 字体 ---------- */
 /* 由 @deepseek-figma-plugin/custom-variable-name 插件导出 */
 body {
-  --dsw-font-markdown-h1: 700 24px/34px var(--dsw-font-family);
-  --dsw-font-markdown-h1-font-family: var(--dsw-font-family);
+  --dsw-font-markdown-h1: 700 24px/34px var(--dsw-font-display);
+  --dsw-font-markdown-h1-font-family: var(--dsw-font-display);
   --dsw-font-markdown-h1-font-weight: 700;
   --dsw-font-markdown-h1-line-height: 34px;
   --dsw-font-markdown-h1-font-size: 24px;
   --dsw-font-markdown-h1-font-style: normal;
 
-  --dsw-font-markdown-h2: 700 22px/32px var(--dsw-font-family);
-  --dsw-font-markdown-h2-font-family: var(--dsw-font-family);
+  --dsw-font-markdown-h2: 700 22px/32px var(--dsw-font-display);
+  --dsw-font-markdown-h2-font-family: var(--dsw-font-display);
   --dsw-font-markdown-h2-font-weight: 700;
   --dsw-font-markdown-h2-line-height: 32px;
   --dsw-font-markdown-h2-font-size: 22px;
   --dsw-font-markdown-h2-font-style: normal;
 
-  --dsw-font-markdown-h3: 700 20px/30px var(--dsw-font-family);
-  --dsw-font-markdown-h3-font-family: var(--dsw-font-family);
+  --dsw-font-markdown-h3: 700 20px/30px var(--dsw-font-display);
+  --dsw-font-markdown-h3-font-family: var(--dsw-font-display);
   --dsw-font-markdown-h3-font-weight: 700;
   --dsw-font-markdown-h3-line-height: 30px;
   --dsw-font-markdown-h3-font-size: 20px;

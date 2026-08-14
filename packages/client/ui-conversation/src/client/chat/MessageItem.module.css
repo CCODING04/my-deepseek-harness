@@ -19,13 +19,26 @@
 .bubble {
   /* 525px cap inside the 736 column; percentage keeps narrow windows sane. */
   max-width: 100%;
-  background: var(--dsw-specific-bubble);
+  /* Pokémon theme: the user bubble is the Pokéball's red half — a red
+     gradient with white ink; links go Pikachu-yellow for contrast. */
+  background: linear-gradient(160deg, #ff5346 0%, #ee1515 48%, #c00f0f 100%);
   border-radius: 22px;
   /* 44px single-line bubble: 24 line + 10 vertical padding each side. */
   padding: 10px 16px;
   font-size: 16px;
   line-height: 24px;
-  color: var(--dsw-alias-label-primary);
+  color: #ffffff;
+}
+
+/* In-bubble markdown accents stay readable on the red fill. */
+.bubble a {
+  color: #ffe27a;
+  text-decoration-color: rgba(255, 226, 122, 0.6);
+}
+
+.bubble code {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 .contextRow {
@@ -269,14 +282,16 @@
 }
 
 /* Reference chip projection inside a user bubble (`<skill>name</skill>` model
-   spans render as chips; free geometry — no textarea pairing here). */
+   spans render as chips; free geometry — no textarea pairing here). Rides the
+   bubble's white ink on a translucent white plate so it stays legible on the
+   red bubble fill. */
 .refChip {
   display: inline-block;
   margin: 0 2px;
   padding: 0 8px;
   border-radius: 6px;
-  background: rgba(97, 135, 216, 0.22);
-  color: var(--dsw-alias-label-primary);
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
   font-size: 0.85em;
   line-height: 1.6;
   white-space: nowrap;

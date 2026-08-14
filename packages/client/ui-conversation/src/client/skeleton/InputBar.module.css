@@ -63,12 +63,22 @@
   width: 100%;
   max-width: var(--dsh-composer-card-max-width);
   padding-top: 10px;
-  /* Input stroke: black/0.10 light, white/0.06 dark (figma darkmode note says
-     the input border is one notch weaker than buttons) — exactly the
-     l2-darkmode-thin pair. Fill: the input surface token (elevated in dark). */
-  border: 1px solid var(--dsw-alias-border-l2-darkmode-thin);
-  border-radius: 22px;
-  background: var(--dsw-specific-input-major);
+  /* Pokémon theme: gradient border (red → Pikachu yellow → blue) painted as
+     a border-box layer under the padding-box fill, plus a faint red polka-dot
+     texture — a kawaii notebook-sticker card. The fill layer is the input
+     surface token (elevated in dark). */
+  border: 1.5px solid transparent;
+  border-radius: 24px;
+  background-image:
+    radial-gradient(color-mix(in srgb, var(--dsw-static-red-500) 7%, transparent) 1px, transparent 1.6px),
+    linear-gradient(var(--dsw-specific-input-major), var(--dsw-specific-input-major)),
+    linear-gradient(120deg,
+      color-mix(in srgb, var(--dsw-static-red-600) 65%, transparent) 0%,
+      color-mix(in srgb, var(--dsw-static-yellow-500) 55%, transparent) 40%,
+      color-mix(in srgb, var(--dsw-static-blue-500) 65%, transparent) 100%);
+  background-origin: border-box;
+  background-clip: padding-box, padding-box, border-box;
+  background-size: 14px 14px, auto, auto;
   box-shadow: var(--dsw-shadow-lv2);
   font-size: 16px;
   line-height: 24px;
@@ -89,6 +99,9 @@
    inside), which keeps the 22px radius and both themes. */
 .cardWorkspaceTrigger {
   border-color: transparent;
+  /* Trigger state returns to a plain fill: the dashed invite ring replaces
+     the gradient border rather than stacking under it. */
+  background: var(--dsw-specific-input-major);
   cursor: pointer;
 }
 
@@ -338,7 +351,9 @@
 }
 
 .add:hover:not(:disabled) {
-  background: var(--dsw-alias-interactive-bg-hover-solid);
+  /* Pokémon theme: the attach circle glows Pokéball red on hover. */
+  background: color-mix(in srgb, var(--dsw-static-red-600) 18%, var(--dsw-specific-selector));
+  color: var(--dsw-static-red-600);
 }
 
 .add:disabled {
@@ -378,9 +393,9 @@
   cursor: default;
 }
 
-/* Primary send (figma IconButton 34:10465): 34px circle, #3964FE light /
-   #679EFE dark — the info-fill pair (500→400), NOT button-primary (ink);
-   white glyph; empty text = 0.4 opacity. */
+/* Primary send: a Pokéball — red top half, dark band, white bottom half, with
+   the glyph riding a white center button drawn inside the svg. Hover glows
+   like a ball about to open. */
 .primary {
   display: grid;
   place-items: center;
@@ -389,12 +404,11 @@
   height: 34px;
   border: none;
   border-radius: 999px;
-  background: var(--dsw-alias-button-info-fill);
-  /* Static white, not the foreground token: the arrow stays white on the blue
-     fill in both themes (design 34:10465). */
+  background: linear-gradient(180deg, #ee1515 0 41%, #1f1f1f 41% 57%, #f4f4f4 57% 100%);
   color: #fff;
   cursor: pointer;
-  transition: background-color 100ms ease;
+  box-shadow: 0 2px 8px rgba(238, 21, 21, 0.35);
+  transition: box-shadow 100ms ease, filter 100ms ease, transform 100ms ease;
   /* Opts out of the row's 2px downward shift (.row top pad): the send circle
      keeps its original seat while the smaller chips sit lower. Transform, not
      margin, so flex centering math is untouched. */
@@ -402,7 +416,13 @@
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--dsw-alias-button-info-hover);
+  filter: brightness(1.08) saturate(1.12);
+  box-shadow: 0 2px 12px rgba(238, 21, 21, 0.5);
+  transform: translateY(-3px);
+}
+
+.primary:active:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 .primary:disabled {

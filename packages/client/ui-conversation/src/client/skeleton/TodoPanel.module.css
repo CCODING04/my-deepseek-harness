@@ -24,9 +24,14 @@
     var(--dsh-composer-dock-inset) -
     var(--dsh-composer-dock-inset)
   );
-  border: 1px solid var(--dsw-alias-border-l1);
+  border: 1px solid color-mix(in srgb, var(--dsw-static-red-600) 22%, var(--dsw-alias-border-l1));
   border-radius: 12px;
-  background: var(--dsw-specific-tip);
+  /* Pokémon theme: red-tinted stroke + a faint Pikachu-yellow top wash. */
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--dsw-static-yellow-500) 6%, transparent) 0%,
+      transparent 120px),
+    var(--dsw-specific-tip);
   /* Elevated surface: `--dsw-specific-tip` is the same dark rung as the menu
      surface, and `.list` scrolls inside this card, so the thumb takes the l2
      elevation tokens. Declared here because the elevation belongs to the

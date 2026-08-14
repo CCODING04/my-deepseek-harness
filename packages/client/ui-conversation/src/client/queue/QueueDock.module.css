@@ -31,7 +31,12 @@
   width: 100%;
   padding: 2px 0;
   border-radius: 12px 12px 0 0;
-  background: var(--dsw-specific-tip);
+  /* Pokémon theme: a faint blue wash over the queue panel top. */
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--dsw-static-blue-500) 6%, transparent) 0%,
+      transparent 120px),
+    var(--dsw-specific-tip);
   --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
   --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
 }

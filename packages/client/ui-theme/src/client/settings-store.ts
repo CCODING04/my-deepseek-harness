@@ -10,13 +10,15 @@ import type { ThemePreference } from '../theme-settings.ts'
 export interface AppearanceRowState {
   /** Persisted preference (selection state reads this, never the resolved active theme). */
   preference: ThemePreference
+  /** Poké ornaments toggle state. */
+  decorations: boolean
   /** Service revision; -1 until first sync so revision 0 lands as a change. */
   revision: number
 }
 
 /** Declared action shape giving the exported factory a stable return type. */
 type AppearanceRowActions = {
-  sync: (draft: AppearanceRowState, preference: ThemePreference, revision: number) => void
+  sync: (draft: AppearanceRowState, preference: ThemePreference, decorations: boolean, revision: number) => void
 }
 
 /**
@@ -25,11 +27,14 @@ type AppearanceRowActions = {
  */
 export function createAppearanceRowStore(): EngineStoreHandle<AppearanceRowState, AppearanceRowActions> {
   return defineStore({
-    init: (): AppearanceRowState => ({ preference: 'system', revision: -1 }),
+    init: (): AppearanceRowState => ({ preference: 'system', decorations: true, revision: -1 }),
     actions: {
-      sync: (d, preference: ThemePreference, revision: number) => {
-        if (revision <= d.revision) return
+      sync: (d, preference: ThemePreference, decorations: boolean, revision: number) => {
+        // A decorations toggle reuses the current theme revision (it is not a
+        // theme change), so only skip when every field is unchanged.
+        if (revision <= d.revision && preference === d.preference && decorations === d.decorations) return
         d.preference = preference
+        d.decorations = decorations
         d.revision = revision
       },
     },

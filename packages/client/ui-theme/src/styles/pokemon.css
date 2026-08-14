@@ -1,0 +1,177 @@
+/* Pokémon theme decorative layer. Token-independent garnish on top of the
+ * token sheets: gpt-image-2 wallpaper art blended into the base surface
+ * (multiply in light, screen in dark — the white/black plate vanishes and
+ * only the kawaii decorations remain), soft Pokéball-red / Pokémon-blue
+ * atmosphere glows, warm selection ink, and a blue focus ring. */
+
+body {
+  background-color: var(--dsw-alias-bg-base);
+  background-image:
+    url('/pokemon/bg-light.png'),
+    radial-gradient(1400px 700px at 88% -8%,
+      color-mix(in srgb, var(--dsw-static-blue-300) 10%, transparent) 0%,
+      transparent 70%),
+    radial-gradient(1100px 620px at -8% 108%,
+      color-mix(in srgb, var(--dsw-static-red-300) 8%, transparent) 0%,
+      transparent 70%),
+    radial-gradient(760px 440px at 50% 118%,
+      color-mix(in srgb, var(--dsw-static-yellow-400) 5%, transparent) 0%,
+      transparent 75%);
+  background-blend-mode: multiply, normal, normal, normal;
+  background-size: cover, auto, auto, auto;
+  background-attachment: fixed;
+}
+
+body[data-ds-dark-theme] {
+  background-image:
+    url('/pokemon/bg-dark.png'),
+    radial-gradient(1400px 700px at 88% -8%,
+      color-mix(in srgb, var(--dsw-static-blue-500) 10%, transparent) 0%,
+      transparent 70%),
+    radial-gradient(1100px 620px at -8% 108%,
+      color-mix(in srgb, var(--dsw-static-red-500) 7%, transparent) 0%,
+      transparent 70%),
+    radial-gradient(760px 440px at 50% 118%,
+      color-mix(in srgb, var(--dsw-static-yellow-400) 5%, transparent) 0%,
+      transparent 75%);
+  background-blend-mode: screen, normal, normal, normal;
+}
+
+::selection {
+  background: var(--dsw-static-red-600);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--dsw-static-blue-500);
+  outline-offset: 1px;
+}
+
+/* Floating kawaii ornaments: a faint spinning Pokéball outline on the right
+   edge and a tiny star-sparkle cluster near the message column. Pure SVG
+   data-URIs — no assets, no layout impact. They live on #pokemon-decor (an
+   element the shell places AFTER #root), so they paint above the app's
+   background layers instead of being buried under them. */
+
+#pokemon-decor {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+#pokemon-decor::before {
+  content: '';
+  position: fixed;
+  right: 16px;
+  bottom: 84px;
+  width: 240px;
+  height: 240px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10.2' fill='none' stroke='%23EE1515' stroke-width='1.5'/%3E%3Cpath d='M1.8 12 A10.2 10.2 0 0 1 22.2 12' fill='none' stroke='%23EE1515' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='12' r='3.8' fill='none' stroke='%23EE1515' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat center / contain;
+  opacity: 0.12;
+  animation: pokemon-ornament-spin 48s linear infinite;
+}
+
+@keyframes pokemon-ornament-spin {
+  to { transform: rotate(360deg); }
+}
+
+#pokemon-decor::after {
+  content: '';
+  position: fixed;
+  left: 272px;
+  bottom: 44px;
+  width: 96px;
+  height: 96px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M12 3 L14.4 8.6 L20 11 L14.4 13.4 L12 19 L9.6 13.4 L4 11 L9.6 8.6 Z' fill='%23FFCB05'/%3E%3Cpath d='M31 22 L32.4 25.4 L36 27 L32.4 28.6 L31 32 L29.6 28.6 L26 27 L29.6 25.4 Z' fill='%233B4CCA'/%3E%3Ccircle cx='8' cy='30' r='2' fill='%23EE1515'/%3E%3Ccircle cx='35' cy='8' r='1.6' fill='%23FFCB05'/%3E%3Ccircle cx='5' cy='14' r='1.3' fill='%233B4CCA'/%3E%3C/svg%3E") no-repeat center / contain;
+  opacity: 0.14;
+  animation: pokemon-ornament-twinkle 4s ease-in-out infinite;
+}
+
+@keyframes pokemon-ornament-twinkle {
+  0%, 100% { opacity: 0.14; transform: scale(1); }
+  50% { opacity: 0.22; transform: scale(1.06) }
+}
+
+@media (max-width: 880px) {
+  #pokemon-decor::before,
+  #pokemon-decor::after {
+    display: none;
+  }
+}
+
+/* Pokémon back-sprite ornaments (official transparent pixel art): Pikachu's
+   back on the top-right corner and Bulbasaur's below it — buddies working
+   beside the chat. Pixel-crisp, gently floating. */
+
+.decor-pika {
+  position: fixed;
+  right: 44px;
+  top: 44px;
+  width: 84px;
+  height: 84px;
+  background: url('/pokemon/pets/pikachu-typing.png') no-repeat center / contain;
+  image-rendering: pixelated;
+  opacity: 0.9;
+  animation: pokemon-ornament-float 5.5s ease-in-out infinite;
+}
+
+.decor-bulba {
+  position: fixed;
+  right: 128px;
+  top: 150px;
+  width: 60px;
+  height: 60px;
+  background: url('/pokemon/bulbasaur-back.png') no-repeat center / contain;
+  image-rendering: pixelated;
+  opacity: 0.85;
+  animation: pokemon-ornament-float 6.5s ease-in-out 0.6s infinite;
+}
+
+@keyframes pokemon-ornament-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.decor-note {
+  position: fixed;
+  left: 284px;
+  top: 216px;
+  width: 58px;
+  height: 58px;
+  background: url('/pokemon/sticker-note.png') no-repeat center / contain;
+  mix-blend-mode: multiply;
+  opacity: 0.75;
+  animation: pokemon-ornament-twinkle 5s ease-in-out infinite;
+}
+
+.decor-bubbles {
+  position: fixed;
+  right: 36px;
+  bottom: 40px;
+  width: 88px;
+  height: 88px;
+  background: url('/pokemon/sticker-bubbles.png') no-repeat center / contain;
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+  animation: pokemon-ornament-twinkle 6s ease-in-out infinite;
+}
+
+@media (max-width: 880px) {
+  .decor-pika,
+  .decor-bulba,
+  .decor-note,
+  .decor-bubbles {
+    display: none;
+  }
+}
+
+/* Ornaments off switch (settings → Appearance → Poké 装饰): hides the
+   floating sticker layer and the body atmosphere glows. */
+body[data-dsh-no-decor] #pokemon-decor {
+  display: none;
+}
+
+body[data-dsh-no-decor] {
+  background-image: none;
+}

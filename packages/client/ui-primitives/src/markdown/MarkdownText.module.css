@@ -97,7 +97,8 @@
 
 .markdown li::marker {
   line-height: 28px;
-  color: var(--dsw-alias-label-secondary);
+  /* Pokémon theme: list bullets ride Pokéball red. */
+  color: var(--dsw-static-red-600);
 }
 
 /* Nested ol under ul/ol: markers inside (models sometimes emit this shape). */
@@ -126,15 +127,24 @@
 .markdown hr {
   display: block;
   border: none;
-  height: 1px;
+  height: 2px;
   margin: 32px 0;
-  background: var(--dsw-alias-border-l2);
+  border-radius: 1px;
+  /* Pokémon theme: a red → Pikachu-yellow → blue ribbon divider. */
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--dsw-static-red-600) 80%, transparent),
+    color-mix(in srgb, var(--dsw-static-yellow-500) 80%, transparent) 45%,
+    color-mix(in srgb, var(--dsw-static-blue-500) 80%, transparent));
+  opacity: 0.65;
 }
 
 .markdown blockquote {
-  border-left: 2px solid var(--dsw-alias-label-caption);
+  border-left: 3px solid var(--dsw-static-red-600);
   margin: 16px 0 0;
-  padding-left: 14px;
+  padding: 8px 12px 8px 14px;
+  border-radius: 0 12px 12px 0;
+  /* Pokémon theme: a soft red-tinted quote card. */
+  background: color-mix(in srgb, var(--dsw-static-red-600) 6%, transparent);
 }
 
 .markdown pre {
@@ -192,6 +202,8 @@
   max-width: 320px;
   max-width: min(30vw, 320px);
   min-width: 100px;
+  /* Pokémon theme: a faint blue header band. */
+  background: color-mix(in srgb, var(--dsw-static-blue-500) 6%, transparent);
 }
 
 .tableScroll td {

@@ -20,7 +20,7 @@ import { AppearanceRow } from './AppearanceRow.tsx'
 import { createAppearanceRowStore } from './settings-store.ts'
 import { en, zh, type ThemeKey } from './locales.ts'
 import {
-  DEFAULT_PREFERENCE, isThemePreference, THEME_PREFERENCE_FIELD, THEME_SETTINGS_NAMESPACE,
+  DECORATIONS_FIELD, DEFAULT_PREFERENCE, isThemePreference, THEME_PREFERENCE_FIELD, THEME_SETTINGS_NAMESPACE,
   type ThemePreference, type ThemeSettings,
 } from '../theme-settings.ts'
 
@@ -390,10 +390,28 @@ export function apply(ctx: ClientContext): void {
 
   const store = createAppearanceRowStore()
   let bound: BoundActions<typeof store> | undefined
+  // Poké ornaments toggle: persisted beside the preference; applied to the
+  // body attribute the decorative sheets gate on (the runtime itself stays
+  // DOM-free).
+  let decorations = true
+  const applyDecorations = (value: boolean): void => {
+    decorations = value
+    if (typeof document !== 'undefined') {
+      document.body.toggleAttribute('data-dsh-no-decor', !value)
+    }
+  }
+  applyDecorations(host.getSnapshot().value?.decorations ?? true)
   const sync = (snapshot: ThemeSnapshot): void => {
-    bound?.sync(snapshot.preference, snapshot.revision)
+    bound?.sync(snapshot.preference, decorations, snapshot.revision)
   }
   ctx.on('theme/change', sync)
+  ctx.effect(() => host.subscribe(() => {
+    const value = host.getSnapshot().value
+    applyDecorations(value?.decorations ?? true)
+    // Re-sync so the row reflects the toggled state immediately (the theme
+    // revision guard drops stale duplicates).
+    bound?.sync(theme.getTheme().preference, decorations, theme.getTheme().revision)
+  }), 'ui-theme: decorations adoption')
   const injected = (actions: BoundActions<typeof store>): AppearanceRowInjected => {
     bound = actions
     // Re-sync from the getter so no event is lost between registration and
@@ -401,6 +419,7 @@ export function apply(ctx: ClientContext): void {
     sync(theme.getTheme())
     return {
       setTheme: (id) => { theme.setTheme(id) },
+      setDecorations: (value) => { void host.set(DECORATIONS_FIELD, value) },
     }
   }
   ctx.slots.inject('settings.general.item', () => ctx.slots.register({

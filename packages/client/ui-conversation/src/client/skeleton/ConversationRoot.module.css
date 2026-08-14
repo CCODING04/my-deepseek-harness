@@ -30,6 +30,11 @@
   flex: none;
   padding: 12px 28px 0 20px;
   border-bottom: 1px solid transparent;
+  /* Pokémon theme: a faint Pikachu-yellow wash fades into the base surface
+     behind the session title bar. */
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--dsw-static-yellow-500) 7%, transparent) 0%,
+    transparent 100%);
 }
 
 .header::after {
@@ -39,8 +44,14 @@
   bottom: 1px;
   left: 0;
   z-index: 0;
-  height: 1px;
-  background: var(--dsw-alias-border-l2);
+  height: 2px;
+  border-radius: 1px;
+  /* Pokémon theme: red → Pikachu-yellow → blue ribbon under the title bar. */
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--dsw-static-red-600) 75%, transparent),
+    color-mix(in srgb, var(--dsw-static-yellow-500) 75%, transparent) 45%,
+    color-mix(in srgb, var(--dsw-static-blue-500) 75%, transparent));
+  opacity: 0.55;
   pointer-events: none;
 }
 
@@ -107,9 +118,14 @@
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
+/* Pokémon theme: the current session title rides the display face in a
+   larger, brand-ink weight so the header reads at a glance. */
 .crumbCurrent {
-  font-weight: 500;
-  color: var(--dsw-alias-label-primary);
+  font-family: var(--dsw-font-display);
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--dsw-alias-brand-text);
   cursor: default;
 }
 

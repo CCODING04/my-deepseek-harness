@@ -13,13 +13,33 @@
   height: 100%;
   padding: 6px var(--dsh-sidebar-inline-padding);
   box-sizing: border-box;
-  background: var(--dsw-specific-sidebar-fill);
+  background-color: var(--dsw-specific-sidebar-fill);
+  /* Pokémon theme: a faint Pikachu thunderbolt outline anchored to the column
+     foot plus a soft yellow glow — self-drawn SVG, no assets. */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13.4 2 L5.2 13.6 H10.4 L9.4 22 L19.4 9.4 H13.2 Z' fill='none' stroke='%23FFCB05' stroke-opacity='0.3' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E"),
+    radial-gradient(460px 320px at 50% 116%,
+      color-mix(in srgb, var(--dsw-static-yellow-500) 9%, transparent) 0%,
+      transparent 70%);
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: 118px, auto;
   color: var(--dsw-alias-label-primary);
   font-size: 14px;
   /* The sidebar is elevated above the conversation surface, so a revealed
      scrollbar uses the l2 pair. .quietBars hides it without changing layout. */
   --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
   --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+}
+
+/* The 56px rail has no room for the watermark. */
+.root.collapsed {
+  background-image: none;
+}
+
+/* Ornaments off: drop the sidebar background art along with the sticker layer. */
+:global(body[data-dsh-no-decor]) .root {
+  background-image: none;
 }
 
 /* Rail geometry (figma rail spec): 36x36 control boxes centered in the 56px

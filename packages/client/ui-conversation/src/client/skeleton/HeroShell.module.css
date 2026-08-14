@@ -23,16 +23,65 @@
   overflow: visible;
 }
 
+/* Pokémon mascot above the headline: official-artwork Pikachu with a soft
+   red-tinted shadow and a slow breathing float. */
+.mascot {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.mascot img {
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 22px rgba(238, 21, 21, 0.18));
+  animation: mascot-bob 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Grounding ellipse under the mascot so it doesn't read as floating. */
+.mascot::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 96px;
+  height: 14px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--dsw-static-neutral-1000) 16%, transparent) 0%,
+    transparent 72%);
+}
+
+@keyframes mascot-bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot img {
+    animation: none;
+  }
+}
+
 /* figma 34:10411: fish + title, gap 10, centered; 26/32 wt500. The preview
    badge is a product addition outside that source: a mono superscript pill
-   riding the title's top-right. */
+   riding the title's top-right. Pokémon theme: display face for the
+   headline, Pikachu-yellow badge plate with amber ink. */
 .headline {
   display: grid;
   grid-template-columns: 34px auto auto;
   column-gap: 10px;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-family: var(--dsw-font-display);
+  font-size: 24px;
   line-height: 32px;
   font-weight: 500;
   color: var(--dsw-alias-label-primary);
@@ -50,14 +99,14 @@
   margin-top: 2px;
   margin-left: -3px;
   padding: 1px 7px 0;
-  border: 1px solid var(--dsw-alias-interactive-bg-hover);
+  border: 1px solid var(--dsw-static-yellow-400);
   border-radius: 24px;
-  background: var(--dsw-alias-state-business-tertiary);
-  color: var(--dsw-alias-label-primary-bluish);
-  font-family: var(--ds-font-family-code);
+  background: var(--dsw-alias-state-warn-tertiary);
+  color: var(--dsw-alias-state-warn-label);
+  font-family: var(--dsw-font-display);
   font-size: 12px;
   line-height: 18px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 }
 

@@ -20,6 +20,8 @@ import css from './AppearanceRow.module.css'
 export interface AppearanceRowInjected {
   /** Switch the theme preference. */
   setTheme: (id: ThemePreference) => void
+  /** Toggle the Poké ornaments layer. */
+  setDecorations: (value: boolean) => void
 }
 
 /** Full component props: runtime share + store share + locale seat + injected face. */
@@ -39,8 +41,9 @@ const CUBES: readonly { id: ThemePreference; labelKey: ThemeKey; Icon: typeof Ic
  * @param props - composed slot props.
  * @returns the row element tree.
  */
-export function AppearanceRow({ t, setTheme, useStore }: AppearanceRowComponentProps) {
+export function AppearanceRow({ t, setTheme, setDecorations, useStore }: AppearanceRowComponentProps) {
   const preference = useStore(s => s.preference)
+  const decorations = useStore(s => s.decorations)
   return (
     <div className={css.group}>
       <div className={css.title}>{t('appearance.title')}</div>
@@ -57,6 +60,17 @@ export function AppearanceRow({ t, setTheme, useStore }: AppearanceRowComponentP
             {t(labelKey)}
           </button>
         ))}
+      </div>
+      <div className={css.decorRow}>
+        <button
+          type="button"
+          className={clsx(css.decorToggle, decorations && css.decorToggleOn)}
+          aria-pressed={decorations}
+          onClick={() => { setDecorations(!decorations) }}
+        >
+          <span className={css.decorThumb} />
+        </button>
+        <span className={css.decorLabel}>{t('appearance.decorations')}</span>
       </div>
     </div>
   )
