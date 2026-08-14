@@ -5,12 +5,17 @@ export type PluginsSettingsLocaleKey =
   | 'nav' | 'title' | 'intro' | 'tabs' | 'configurableTab' | 'empty'
   | 'overridden' | 'reset' | 'readOnly' | 'expand' | 'collapse'
   | 'save' | 'saving' | 'discard' | 'unsaved' | 'saveFailed' | 'invalidNumber'
+  | 'cancel'
   | 'bashTitle' | 'bashDescription' | 'bashTimeoutMs' | 'bashTimeoutMsHint'
   | 'bashMaxOutputBytes' | 'bashMaxOutputBytesHint'
   | 'agentLoopTitle' | 'agentLoopDescription' | 'agentLoopMaxParallel' | 'agentLoopMaxParallelHint'
   | 'webSearchTitle' | 'webSearchDescription'
   | 'webSearchApiKey' | 'webSearchApiKeyHint' | 'webSearchApiKeySet' | 'webSearchApiKeyUnset'
   | 'webSearchBaseUrl' | 'webSearchBaseUrlHint' | 'webSearchMaxUses' | 'webSearchMaxUsesHint'
+  | 'visionTitle' | 'visionDescription' | 'visionEmpty'
+  | 'visionDefault' | 'visionUp' | 'visionDown' | 'visionRemove'
+  | 'visionName' | 'visionEndpoint' | 'visionModel' | 'visionKey'
+  | 'visionMaxCompletion' | 'visionAdd' | 'visionAddSupplier'
 
 /** English copy. */
 export const en: Record<PluginsSettingsLocaleKey, string> = {
@@ -51,6 +56,21 @@ export const en: Record<PluginsSettingsLocaleKey, string> = {
   webSearchBaseUrlHint: 'Leave blank to use the provider default.',
   webSearchMaxUses: 'Max searches per request',
   webSearchMaxUsesHint: 'How many times one request may search before it must answer.',
+  cancel: 'Cancel',
+  visionTitle: 'Vision suppliers',
+  visionDescription: 'Ordered providers for image analysis (analyze_image). The first entry is the default; a failed provider falls through to the next. Changes apply after restarting dsh.',
+  visionEmpty: 'No supplier configured — analysis falls back to the plugin defaults (shared Qwen-MM config).',
+  visionDefault: 'Default',
+  visionUp: 'Move up',
+  visionDown: 'Move down',
+  visionRemove: 'Remove',
+  visionName: 'Name',
+  visionEndpoint: 'Endpoint',
+  visionModel: 'Model',
+  visionKey: 'API key',
+  visionMaxCompletion: 'Use max_completion_tokens (MiMo)',
+  visionAdd: 'Add',
+  visionAddSupplier: 'Add supplier',
 }
 
 /** Simplified Chinese copy. */
@@ -92,4 +112,19 @@ export const zh: Record<PluginsSettingsLocaleKey, string> = {
   webSearchBaseUrlHint: '留空则使用提供方默认地址。',
   webSearchMaxUses: '单次请求最多搜索次数',
   webSearchMaxUsesHint: '一次请求在必须作答前最多可以搜索多少次。',
+  cancel: '取消',
+  visionTitle: '视觉识别供应商',
+  visionDescription: '图片识别（analyze_image）的调用顺序：第一项为默认供应商，失败自动切换下一个。修改保存后重启 dsh 生效。',
+  visionEmpty: '尚未配置供应商——将回退到插件默认（共享的 Qwen-MM 配置）。',
+  visionDefault: '默认',
+  visionUp: '上移',
+  visionDown: '下移',
+  visionRemove: '删除',
+  visionName: '名称',
+  visionEndpoint: '接口地址',
+  visionModel: '模型',
+  visionKey: 'API Key',
+  visionMaxCompletion: '使用 max_completion_tokens（MiMo）',
+  visionAdd: '添加',
+  visionAddSupplier: '添加供应商',
 }

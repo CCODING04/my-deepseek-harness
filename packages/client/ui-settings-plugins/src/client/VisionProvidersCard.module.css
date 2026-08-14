@@ -1,0 +1,169 @@
+/* Vision-supplier card styles: ordered rows with default badge and a compact
+   add form. Tokens from the theme sheets. */
+
+.empty {
+  padding: 8px 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.defaultBadge {
+  flex: none;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--dsw-static-yellow-400);
+  color: #4a3a00;
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 600;
+}
+
+.rowBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.rowName {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowActions {
+  flex: none;
+  display: flex;
+  gap: 4px;
+}
+
+.rowActions button {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.rowActions button:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.rowActions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px dashed var(--dsw-alias-border-l3);
+  border-radius: 10px;
+  margin: 6px 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1.4fr;
+  gap: 8px;
+}
+
+.input {
+  box-sizing: border-box;
+  min-width: 0;
+  height: 32px;
+  padding: 4px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: var(--dsw-specific-input-major);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+}
+
+.input:focus {
+  outline: 2px solid var(--dsw-static-blue-500);
+  outline-offset: -1px;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.formActions {
+  display: flex;
+  gap: 8px;
+}
+
+.addBtn {
+  align-self: flex-start;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--dsw-static-blue-500);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--dsw-static-blue-500) 12%, transparent);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--dsw-static-blue-500) 20%, transparent);
+}
+
+.cancelBtn {
+  align-self: flex-start;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--dsw-alias-border-l3);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.addBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

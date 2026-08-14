@@ -18,6 +18,9 @@
       "path": "../apiproxy"
     },
     {
+      "path": "../../settings/settings"
+    },
+    {
       "path": "../../core/tools"
     },
     {

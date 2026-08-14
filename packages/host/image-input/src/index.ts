@@ -26,6 +26,7 @@ import z from '@deepseek-ai/schemastery'
 import type {
   ImagePromptPreprocessor, PreparedImagePrompt, PromptContentPart,
 } from '@deepseek-ai/dsh-host-apiproxy'
+import { settingsNamespace } from '@deepseek-ai/dsh-settings'
 // Type-only: merges `ctx.tools` into this program's Context.
 import type {} from '@deepseek-ai/dsh-tools'
 import {
@@ -64,13 +65,42 @@ export interface Config {
   instruction?: string
   /** Dedicated analyzer settings (VL endpoint). */
   analyzer?: {
-    /** OpenAI-compatible chat endpoint. @default ~/.qwen-mm-plugins/config DASHSCOPE_BASE_URL, else DashScope. */
+    /**
+     * Ordered VL provider list: each entry is tried in turn until one
+     * succeeds (primary + fallbacks). Add any OpenAI-compatible vision
+     * vendor here — e.g. MiniMax (`model: 'MiniMax-M2.5'`).
+     */
+    providers?: Array<{
+      /** Display name for logs. */
+      name?: string
+      /** OpenAI-compatible chat endpoint (base URL). */
+      endpoint: string
+      /** Bearer key. */
+      apiKey: string
+      /** VL model id. */
+      model: string
+      /** Response token cap per batch. @default 800 */
+      maxTokens?: number
+      /**
+       * Send `max_completion_tokens` instead of `max_tokens` (Xiaomi MiMo
+       * API accepts the former). @default false
+       */
+      usesMaxCompletionTokens?: boolean
+      /**
+       * Auth header name. Xiaomi accepts `api-key` in curl; the OpenAI SDK
+       * path uses `Authorization: Bearer`. @default 'Authorization'
+       */
+      authHeader?: string
+    }>
+    /**
+     * Legacy single-provider fields — treated as providers[0] when
+     * `providers` is absent. Endpoint/key default to the shared
+     * ~/.qwen-mm-plugins/config (DASHSCOPE_BASE_URL / DASHSCOPE_API_KEY),
+     * model to QWEN_MM_API_VL_MODEL then 'qwen3.7-plus'.
+     */
     endpoint?: string
-    /** Bearer key. @default ~/.qwen-mm-plugins/config DASHSCOPE_API_KEY. */
     apiKey?: string
-    /** VL model id. @default 'qwen3.7-plus' */
     model?: string
-    /** Response token cap per batch. @default 800 */
     maxTokens?: number
   }
 }
@@ -80,11 +110,26 @@ export const Config: z<Config> = z.object({
   directory: z.string().default(''),
   instruction: z.string().default(DEFAULT_INSTRUCTION),
   analyzer: z.object({
+    providers: z.array(z.object({
+      name: z.string(),
+      endpoint: z.string(),
+      apiKey: z.string(),
+      model: z.string(),
+      maxTokens: z.natural().default(800),
+      usesMaxCompletionTokens: z.boolean().default(false),
+      authHeader: z.string().default('Authorization'),
+    })).default([]),
     endpoint: z.string().default(''),
     apiKey: z.string().default(''),
-    model: z.string().default('qwen3.7-plus'),
+    model: z.string().default(''),
     maxTokens: z.natural().default(800),
-  }).default({ endpoint: '', apiKey: '', model: 'qwen3.7-plus', maxTokens: 800 }),
+  }).default({
+    providers: [],
+    endpoint: '',
+    apiKey: '',
+    model: '',
+    maxTokens: 800,
+  }),
 })
 
 interface ImagePart {
@@ -118,27 +163,54 @@ function readQwenConfigFile(): Record<string, string> {
   }
 }
 
-interface ResolvedAnalyzer {
+interface ResolvedProvider {
+  name: string
   endpoint: string
   apiKey: string
   model: string
   maxTokens: number
+  usesMaxCompletionTokens: boolean
+  authHeader: string
 }
 
-function resolveAnalyzer(raw: NonNullable<Config['analyzer']>): ResolvedAnalyzer {
+/**
+ * Fold plugin config into the ordered provider list: explicit `providers`
+ * first, then the legacy single-provider fields (defaults inherited from the
+ * shared Qwen-MM config file), so any OpenAI-compatible vision vendor can be
+ * added by configuration alone.
+ */
+function resolveProviders(raw: NonNullable<Config['analyzer']>): ResolvedProvider[] {
   const shared = readQwenConfigFile()
-  return {
-    endpoint: raw.endpoint
+  if (raw.providers !== undefined && raw.providers.length > 0) {
+    return raw.providers.map(provider => ({
+      name: provider.name || provider.model,
+      endpoint: provider.endpoint.replace(/\/+$/, ''),
+      // Empty key falls back to the shared Qwen-MM config (DASHSCOPE_API_KEY)
+      // so a provider list can name an endpoint/model without repeating keys.
+      apiKey: provider.apiKey || shared['DASHSCOPE_API_KEY'] || '',
+      model: provider.model,
+      maxTokens: provider.maxTokens ?? 800,
+      usesMaxCompletionTokens: provider.usesMaxCompletionTokens ?? false,
+      authHeader: provider.authHeader ?? 'Authorization',
+    }))
+  }
+  return [{
+    name: 'qwen',
+    endpoint: (raw.endpoint
       || shared['DASHSCOPE_BASE_URL']
       || process.env['DASHSCOPE_BASE_URL']
-      || 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+      || 'https://dashscope.aliyuncs.com/compatible-mode/v1').replace(/\/+$/, ''),
     apiKey: raw.apiKey
       || shared['DASHSCOPE_API_KEY']
       || process.env['DASHSCOPE_API_KEY']
       || '',
-    model: raw.model ?? 'qwen3.7-plus',
+    model: raw.model
+      || shared['QWEN_MM_API_VL_MODEL']
+      || 'qwen3.7-plus',
     maxTokens: raw.maxTokens ?? 800,
-  }
+    usesMaxCompletionTokens: false,
+    authHeader: 'Authorization',
+  }]
 }
 
 /** Session-scoped staging directory (session id sanitized for the filesystem). */
@@ -187,14 +259,35 @@ export function apply(ctx: Context, config: Config): void {
     ? config.directory
     : join(tmpdir(), 'dsh-image-inputs')
   const instruction = config.instruction ?? DEFAULT_INSTRUCTION
-  const analyzer = resolveAnalyzer(config.analyzer ?? { endpoint: '', apiKey: '', model: 'qwen3.7-plus', maxTokens: 800 })
+  // Provider order: the durable WebUI supplier settings (when present), else
+  // the plugin config (cordis.patch.yml / shared Qwen-MM config file).
+  let providers = resolveProviders(config.analyzer ?? { providers: [], endpoint: '', apiKey: '', model: '', maxTokens: 800 })
+  // The settings service arrives through an OPTIONAL inject block: it may not
+  // be provided yet (or at all) when this plugin's own apply runs, so a plain
+  // ctx.get here could silently miss it and the WebUI card would never see the
+  // namespace.
+  ctx.inject(['settings'], (settingsCtx) => {
+    settingsCtx.settings.register(settingsNamespace(SETTINGS_NS), VisionSettingsSchema)
+    const stored = settingsCtx.settings.get(settingsNamespace(SETTINGS_NS)) as VisionSettings | undefined
+    if (stored?.providers !== undefined && stored.providers.length > 0) {
+      providers = stored.providers.map(provider => ({
+        name: provider.name || provider.model,
+        endpoint: provider.endpoint.replace(/\/+$/, ''),
+        apiKey: provider.apiKey,
+        model: provider.model,
+        maxTokens: provider.maxTokens,
+        usesMaxCompletionTokens: provider.usesMaxCompletionTokens,
+        authHeader: provider.authHeader,
+      }))
+    }
+  })
   sweepStaleDirs(root, 24 * 60 * 60 * 1000)
 
   const preprocessor: ImagePromptPreprocessor = {
-    prepare: async (sessionId, content) => {
-      if (!config.enabled) return undefined
+    prepare: (sessionId, content) => {
+      if (!config.enabled) return Promise.resolve(undefined)
       const images = content.filter(isImagePart) as ImagePart[]
-      if (images.length === 0) return undefined
+      if (images.length === 0) return Promise.resolve(undefined)
       try {
         const paths = stageImages(root, sessionId, images)
         const text = instruction
@@ -205,10 +298,10 @@ export function apply(ctx: Context, config: Config): void {
           { type: 'text', text },
           ...userText,
         ]
-        return { modelParts }
+        return Promise.resolve({ modelParts })
       } catch (error: unknown) {
-        ctx.logger?.warn(`host-image-input: staging failed: ${error instanceof Error ? error.message : String(error)}`)
-        return undefined
+        ctx.logger.warn(`host-image-input: staging failed: ${error instanceof Error ? error.message : String(error)}`)
+        return Promise.resolve(undefined)
       }
     },
     cleanup: (sessionId) => {
@@ -253,12 +346,11 @@ export function apply(ctx: Context, config: Config): void {
         },
         render: (_args, value) => [{
           type: 'text',
-          text: String((value as { text: string }).text),
+          text: (value as { text: string }).text,
         }],
       },
       execute: async (args) => {
         const { images, question } = args as { images: string[]; question?: string }
-        if (analyzer.apiKey === '') throw new Error('analyze_image: 未配置 DASHSCOPE_API_KEY(~/.qwen-mm-plugins/config)')
         const content: Array<Record<string, unknown>> = [
           { type: 'text', text: question ?? DEFAULT_QUESTION },
         ]
@@ -274,32 +366,54 @@ export function apply(ctx: Context, config: Config): void {
             image_url: { url: `data:${mediaType};base64,${bytes.toString('base64')}` },
           })
         }
-        const endpoint = analyzer.endpoint.replace(/\/+$/, '')
-        const response = await fetch(`${endpoint}/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${analyzer.apiKey}`,
-          },
-          body: JSON.stringify({
-            model: analyzer.model,
-            messages: [{ role: 'user', content }],
-            // Thinking disabled: the VL model answers directly, which cuts
-            // latency and tokens by an order of magnitude.
-            enable_thinking: false,
-            max_tokens: analyzer.maxTokens,
-          }),
-          signal: AbortSignal.timeout(120_000),
-        })
-        if (!response.ok) {
-          const detail = await response.text().catch(() => '')
-          throw new Error(`analyze_image 端点 ${response.status}: ${detail.slice(0, 200)}`)
+        // Try each configured provider in order (primary + fallbacks).
+        const failures: string[] = []
+        for (const provider of providers) {
+          if (provider.apiKey === '') {
+            failures.push(`${provider.name}: no api key`)
+            continue
+          }
+          try {
+            // Some vendors reject unknown parameters (e.g. enable_thinking);
+            // retry without it when the first attempt is a 400 on that field.
+            for (const withThinking of [false, undefined]) {
+              const body: Record<string, unknown> = {
+                model: provider.model,
+                messages: [{ role: 'user', content }],
+                ...(provider.usesMaxCompletionTokens
+                  ? { max_completion_tokens: provider.maxTokens }
+                  : { max_tokens: provider.maxTokens }),
+                ...(withThinking === false ? { enable_thinking: false } : {}),
+              }
+              const response = await fetch(`${provider.endpoint}/chat/completions`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  [provider.authHeader]: provider.authHeader === 'Authorization'
+                    ? `Bearer ${provider.apiKey}`
+                    : provider.apiKey,
+                },
+                body: JSON.stringify(body),
+                signal: AbortSignal.timeout(120_000),
+              })
+              if (!response.ok) {
+                const detail = await response.text().catch(() => '')
+                if (withThinking === false && detail.toLowerCase().includes('enable_thinking')) {
+                  continue // retry without the unknown field
+                }
+                throw new Error(`${response.status}: ${detail.slice(0, 160)}`)
+              }
+              const json = await response.json() as {
+                choices?: Array<{ message?: { content?: unknown } }>
+              }
+              const text = json.choices?.[0]?.message?.content
+              return { text: typeof text === 'string' ? text : '' }
+            }
+          } catch (error: unknown) {
+            failures.push(`${provider.name}: ${error instanceof Error ? error.message : String(error)}`)
+          }
         }
-        const json = await response.json() as {
-          choices?: Array<{ message?: { content?: unknown } }>
-        }
-        const text = json.choices?.[0]?.message?.content
-        return { text: typeof text === 'string' ? text : '' }
+        throw new Error(`analyze_image: 所有视觉供应商均失败 — ${failures.join(' | ')}`)
       },
       isConcurrencySafe: () => false,
     })
@@ -307,3 +421,33 @@ export function apply(ctx: Context, config: Config): void {
 }
 
 export const inject = ['tools']
+
+/** Settings namespace the WebUI supplier card edits (same shape as providers). */
+export const SETTINGS_NS = 'host-image-input'
+
+const ProviderSettingsSchema = z.object({
+  name: z.string().default(''),
+  endpoint: z.string(),
+  apiKey: z.string().default(''),
+  model: z.string(),
+  maxTokens: z.natural().default(800),
+  usesMaxCompletionTokens: z.boolean().default(false),
+  authHeader: z.string().default('Authorization'),
+})
+
+const VisionSettingsSchema = z.object({
+  providers: z.array(ProviderSettingsSchema).default([]),
+})
+
+/** Stored section shape (hand-written to avoid z.infer on schemastery). */
+interface VisionSettings {
+  providers?: Array<{
+    name: string
+    endpoint: string
+    apiKey: string
+    model: string
+    maxTokens: number
+    usesMaxCompletionTokens: boolean
+    authHeader: string
+  }>
+}
