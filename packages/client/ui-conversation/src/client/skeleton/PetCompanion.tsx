@@ -4,10 +4,14 @@
  *   - idle:    empty draft, harness not running (breathing)
  *   - typing:  the user is writing (draft non-empty; fast input wiggle)
  *   - working: the harness is generating (thinking sway)
- * Interactions: clicking the buddy pets it (a jump + a heart bubble), a small
- * switch button opens the roster picker, and every finished run plays a short
- * celebration jump with a "done" bubble. Mood phrases rotate by pose; the
- * choice persists in localStorage. Pose art lives under
+ * Every pet speaks its own lines (Pikachu "皮卡皮!", Psyduck "嘎?", Gengar
+ * "嘿嘿嘿…", Jigglypuff "啵啵哩~"). Interactions:
+ *   - clicking the buddy pets it (a jump + a heart bubble, then an idle line)
+ *   - clicking while the harness is running reports the LIVE session state
+ *     (turns · steps from the sessionStats projection) instead
+ *   - a small switch button opens the roster picker
+ *   - every finished run plays a short celebration jump with a "done" bubble
+ * The choice persists in localStorage. Pose art lives under
  * apps/web/public/pokemon/pets/ (<pet>-<pose>.png); while a pose file is
  * missing the img falls back to the single official-artwork sprite for that
  * pet (or Pikachu).
@@ -15,6 +19,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Menu } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { MenuEntry } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { UseProjection } from '@deepseek-ai/dsh-client-runtime/client'
+// Type-only: merges the sessionStats key into SessionProjectionMap.
+import type {} from '@deepseek-ai/dsh-session-stats/client'
 import css from './PetCompanion.module.css'
 
 /** Selectable companion roster. */
@@ -43,11 +50,28 @@ export interface PetMood {
   kind: PetMoodKind
 }
 
-/** Rotating copy by pose, picked randomly per bubble. */
-const PHRASES: Record<PetPose, readonly string[]> = {
-  idle: ['皮卡皮!', '今天要捕捉哪只精灵?', '等你下达指令~', '尾巴在充电中…'],
-  typing: ['快输入啦!', '捕捉信号中…', '招式就绪!'],
-  working: ['思考中…', '发动十万伏特!', '正在检索招式表…', '击中要害!'],
+/** Per-pet personality copy, rotated randomly per bubble by pose. */
+const PET_PHRASES: Record<PetId, Record<PetPose, readonly string[]>> = {
+  pikachu: {
+    idle: ['皮卡皮!', '今天要捕捉哪只精灵?', '等你下达指令~', '尾巴在充电中…'],
+    typing: ['快输入啦!', '捕捉信号中…', '招式就绪!'],
+    working: ['思考中…', '发动十万伏特!', '正在检索招式表…', '击中要害!'],
+  },
+  psyduck: {
+    idle: ['嘎?', '头痛…想不起来了', '发呆中…', '今天也是个好天气?'],
+    typing: ['嘎嘎!', '在看了在看了'],
+    working: ['嘎?在想了…', '头疼也要想!', '唔…招式是啥来着'],
+  },
+  gengar: {
+    idle: ['嘿嘿嘿…', '来玩捉迷藏吧', '暗处观察中…', '你的影子在动哦'],
+    typing: ['嘿嘿,快输入吧', '影子里等你'],
+    working: ['暗影球准备…', '嘿嘿,思考中', '潜入你的会话里了'],
+  },
+  jigglypuff: {
+    idle: ['啵啵哩~', '想唱歌给你听', '胖丁甜甜的~', '呼噜呼噜…'],
+    typing: ['啵啵!快点啦', '歌声准备中…'],
+    working: ['唱首歌助助兴~', '啵啵哩哩…', '要用歌声催眠它!'],
+  },
 }
 
 const CELEBRATE_TEXT = '完成啦!'
@@ -78,6 +102,9 @@ export interface PetCompanionProps {
   running: boolean
   /** Current composer draft text (typing pose when non-empty). */
   draft: string
+  /** Optional projection seat: lets the buddy read live session state
+   *  (turns · steps) so its working bubble reports real battle progress. */
+  useProjection?: UseProjection
 }
 
 /**
@@ -85,15 +112,23 @@ export interface PetCompanionProps {
  * @param props - live state feeding the pose selection.
  * @returns the positioned buddy + its picker menu.
  */
-export function PetCompanion({ running, draft }: PetCompanionProps) {
+export function PetCompanion({ running, draft, useProjection }: PetCompanionProps) {
   const [pet, setPet] = useState<PetId>(storedPet)
   const [open, setOpen] = useState(false)
   const [mood, setMood] = useState<PetMood | null>(null)
   const [jumping, setJumping] = useState(false)
   const jumpTimer = useRef<number | undefined>(undefined)
   const prevRunning = useRef(running)
+  const prevPose = useRef<PetPose>('idle')
 
   const pose: PetPose = running ? 'working' : draft.trim() !== '' ? 'typing' : 'idle'
+
+  // Live session reading: turns + steps from the durable sessionStats
+  // projection (present only when a session with stats is open).
+  const sessionStats = useProjection?.('sessionStats')
+  const statusText = sessionStats === undefined || sessionStats.turns <= 0
+    ? null
+    : `第 ${sessionStats.turns} 轮 · 第 ${sessionStats.steps} 步`
 
   /** One-shot jump: the celebration/petting hop, played via a data-mood class. */
   const triggerJump = (): void => {
@@ -102,15 +137,28 @@ export function PetCompanion({ running, draft }: PetCompanionProps) {
     jumpTimer.current = window.setTimeout(() => { setJumping(false) }, JUMP_MS)
   }
 
-  /** Pet the buddy: a hop with a heart bubble. */
+  /** Pet the buddy: a hop with a heart bubble — or live battle status while running. */
   const petBuddy = (): void => {
     triggerJump()
+    if (running) {
+      setMood({ text: statusText ?? pick(PET_PHRASES[pet].working), kind: 'phrase' })
+      return
+    }
     setMood({ text: HEART, kind: 'heart' })
     window.setTimeout(() => {
       // The heart flashes briefly, then the buddy says an idle line.
-      setMood({ text: pick(PHRASES.idle), kind: 'phrase' })
+      setMood({ text: pick(PET_PHRASES[pet].idle), kind: 'phrase' })
     }, 420)
   }
+
+  // Working onset: the buddy announces it started thinking, with live state.
+  useEffect(() => {
+    const was = prevPose.current
+    prevPose.current = pose
+    if (pose === 'working' && was !== 'working') {
+      setMood({ text: statusText ?? pick(PET_PHRASES[pet].working), kind: 'phrase' })
+    }
+  }, [pose, pet, statusText])
 
   // Run-finished celebration: the harness just stopped producing → cheer.
   useEffect(() => {
@@ -118,9 +166,12 @@ export function PetCompanion({ running, draft }: PetCompanionProps) {
     prevRunning.current = running
     if (wasRunning && !running) {
       triggerJump()
-      setMood({ text: CELEBRATE_TEXT, kind: 'celebrate' })
+      const done = sessionStats === undefined || sessionStats.turns <= 0
+        ? CELEBRATE_TEXT
+        : `完成 ${sessionStats.turns} 轮!`
+      setMood({ text: done, kind: 'celebrate' })
     }
-  }, [running])
+  }, [running, statusText, sessionStats])
 
   // Mood bubble auto-fade.
   useEffect(() => {

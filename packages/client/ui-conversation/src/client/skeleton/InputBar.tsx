@@ -675,7 +675,7 @@ export function InputBar({
         onClick={workspaceTrigger ? onRequestWorkspace : undefined}
         onPointerDown={workspaceTrigger ? (e) => { e.stopPropagation() } : undefined}
       >
-        <PetCompanion running={running} draft={draft} />
+        <PetCompanion running={running} draft={draft} useProjection={useProjection} />
         {overlay !== undefined && <div className={css.overlayAnchor}>{overlay}</div>}
         {accessory !== undefined && <div className={css.accessory}>{accessory}</div>}
         {railItems.length > 0 && (
