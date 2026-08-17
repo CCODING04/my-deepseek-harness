@@ -1,0 +1,247 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 720px;
+  min-width: 0;
+}
+
+.heading {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.intro {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--dsh-text-secondary, #667085);
+}
+
+.subheading {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--dsh-border, rgba(127, 127, 127, 0.25));
+  border-radius: 10px;
+  background: var(--dsh-surface, rgba(127, 127, 127, 0.06));
+  min-width: 0;
+}
+
+.stateRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.stateDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.stateDot[data-state='stopped'] {
+  background: #98a2b3;
+}
+
+.stateDot[data-state='starting'] {
+  background: #f79009;
+}
+
+.stateDot[data-state='running'] {
+  background: #12b76a;
+}
+
+.stateDot[data-state='error'] {
+  background: #f04438;
+}
+
+.errorText {
+  color: var(--dsh-danger, #f04438);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.urlRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.urlLabel {
+  font-size: 12px;
+  color: var(--dsh-text-secondary, #667085);
+}
+
+.url {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.linkButton {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 2px 6px;
+  font-size: 12px;
+  color: var(--dsh-accent, #2563eb);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+}
+
+.metaRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--dsh-text-secondary, #667085);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.primary {
+  background: var(--dsh-accent, #2563eb);
+  border: none;
+  color: #fff;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.primary:disabled,
+.danger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.danger {
+  background: var(--dsh-danger, #f04438);
+  border: none;
+  color: #fff;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--dsh-text-secondary, #667085);
+  min-width: 0;
+}
+
+.field input {
+  padding: 6px 8px;
+  border: 1px solid var(--dsh-border, rgba(127, 127, 127, 0.35));
+  border-radius: 6px;
+  background: var(--dsh-input, transparent);
+  color: inherit;
+  font-size: 13px;
+  min-width: 0;
+}
+
+.formActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+
+.formActions button {
+  appearance: none;
+  border: 1px solid var(--dsh-border, rgba(127, 127, 127, 0.35));
+  background: none;
+  color: inherit;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.formActions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ok {
+  color: #12b76a;
+  font-size: 12px;
+}
+
+.credentialRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  min-width: 0;
+}
+
+.credentialRow code {
+  overflow-wrap: anywhere;
+}
+
+.credentialRow button {
+  appearance: none;
+  border: 1px solid var(--dsh-border, rgba(127, 127, 127, 0.35));
+  background: none;
+  color: inherit;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.failure {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--dsh-danger, #f04438);
+  border-radius: 8px;
+  color: var(--dsh-danger, #f04438);
+  font-size: 13px;
+}
+
+.failure button {
+  appearance: none;
+  border: 1px solid currentColor;
+  background: none;
+  color: inherit;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
