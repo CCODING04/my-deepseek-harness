@@ -60,41 +60,32 @@
 
 **视觉凭据**:`~/.qwen-mm-plugins/config`(`DASHSCOPE_API_KEY` / `DASHSCOPE_BASE_URL`,支持 Token Plan / DashScope / 自建 OpenAI 兼容端点)。
 
-## 三、WebUI 可控的远程访问(远程连接)
+## 三、远程连接(WebUI 可控)
 
-内置插件把本机 dsh web 安全地暴露给其他设备(手机/异地电脑),**无需公网固定 IP、无需路由器端口映射**。
+把本机 dsh web 安全暴露给手机/异地设备,**无需公网 IP、无需端口映射**。
 
 ```
-其他设备 ──HTTPS──> Cloudflare 隧道 ──> 127.0.0.1:8443 认证代理(Basic Auth)
-        ──> 校验凭据后重写 Host/Origin ──> 本机 dsh web(127.0.0.1:3080,未改动)
+其他设备 ─HTTPS─> Cloudflare 隧道 ─> 127.0.0.1:8443 认证代理(Basic Auth) ─> dsh web
 ```
 
-**为什么需要认证代理**:dsh web 的 `/api` trust fence 不是认证层(CLI 也刻意禁止 `--host 0.0.0.0`)。代理是公网 URL 与 agent(可执行命令)之间唯一的门:所有请求必须先通过 Basic Auth,浏览器 WebSocket 事件流通过 HttpOnly cookie 自动携带认证。代理为纯 Node `http`,Windows / Linux / macOS 行为一致;`cloudflared` 二进制按平台在首次启动时自动下载。
+> 为什么需要代理层:dsh 的 `/api` 并非认证层(CLI 也禁止 `--host 0.0.0.0`)。代理是公网与 agent 之间唯一的门,所有请求必须先通过密码;浏览器 WebSocket 事件流由 HttpOnly cookie 自动携带认证。纯 Node 实现,Windows / Linux / macOS 一致,`cloudflared` 二进制首次启动自动下载。
 
-**设置页操作(截图为实际运行界面)**:
+| 状态 | 界面 |
+| --- | --- |
+| **停止** — 显示启动按钮 | ![已停止](docs/images/remote-access-stopped.png) |
+| **运行中** — 显示公网 URL、停止/重启 | ![运行中](docs/images/remote-access-running.png) |
 
-![远程连接-运行中](docs/images/remote-access-running.png)
+**使用**:
 
-*运行中:绿色状态点、公网 URL(可复制/打开)、停止与重启按钮*
+1. WebUI → **设置** → **远程连接** → **启动远程连接**(首次自动下载 cloudflared ≈ 50 MB)
+2. 手机浏览器打开页面上的公网 URL,输入用户名 `dsh` 与页面显示的密码
+3. 用完点 **停止远程连接**;密码可随时**重新生成**
 
-![远程连接-已停止](docs/images/remote-access-stopped.png)
+**注意**:
 
-*已停止:灰色状态点与启动按钮;下方为端口/凭据配置与"重新生成密码"*
-
-**操作说明**:
-
-1. 打开 WebUI → 左下角 **设置** → **远程连接**
-2. 点 **启动远程连接**:首次会下载 cloudflared 二进制(约 50 MB,缓存在 `~/.dsh/remote-access/bin/`),随后显示公网 URL
-3. 手机/其他设备浏览器打开该 URL,输入用户名 `dsh` 与页面上显示的密码
-4. 用完点 **停止远程连接**;凭据可随时在设置页**重新生成**
-
-**注意事项**:
-
-- ⚠️ **公网 URL 即控制权**:任何持有该 URL + 密码的人都能驱动你的 agent 执行命令,密码请勿外泄;怀疑泄露时立即"重新生成密码"
-- quick tunnel 的 URL 每次启动都会变化(Cloudflare 免费临时隧道特性);需要固定域名需自备 Cloudflare 账户与域名(命名隧道,暂未内置)
-- 首次启动需能出站访问 `github.com` 以下载二进制
-- 凭据与配置持久化在 `~/.dsh/settings.yaml` 的 `remote-access` 段(不在 git 内)
-- 插件注册在用户层 `~/.dsh/profiles/web/cordis.patch.yml`,若插件异常导致启动失败,`dsh-web.ps1` 会自动识别并摘除该条目后降级启动(见使用说明)
+- ⚠️ 持有 URL + 密码 = 可控制你的 agent 执行命令;疑似泄露请立即重新生成密码
+- quick tunnel 的 URL 每次启动都会变化;固定域名需自备 Cloudflare 账户(命名隧道,暂未内置)
+- 凭据存于 `~/.dsh/settings.yaml`(不在 git 内);插件注册于用户层 `cordis.patch.yml`,异常时可被 `dsh-web.ps1` 自动降级摘除
 
 ## 四、仓库结构
 
